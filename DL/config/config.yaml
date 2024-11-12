@@ -1,0 +1,90 @@
+fold: 5
+predict_task:
+  alpha: 5
+  epoch: 1500
+  test_epoch: 1
+  batchsize: 128
+  steplr:
+    lr: 0.001
+    stepsize: 10
+    gamma: 0.98
+  cosinelr:
+    warmup_epoch: 50
+    final_lr: 1.0e-05
+    base_lr: 0.01
+  pooling: add
+  tot_config_dim: 25
+  ranklist:
+    config_dim: 25
+  regression:
+    config_dim: 10
+encoder:
+  input_dim_xs: 5
+  input_dim_xt: 8
+  input_dim_edge: 1
+  num_layers: 1
+  hidden_dim: 80
+  mlp_hidden_dim: 90
+  enc_dim: 40
+predict_L2R:
+  hidden_dim: 80
+  mlp_hidden_dim:
+  - 200
+  - 100
+  - 50
+  num_layers: 3
+pyg_regression:
+  gnn_hidden_dim: 50
+  gnn_out_dim: 30
+  pred_mlp_hidden_dim:
+  - 400
+  - 200
+  - 100
+  - 50
+  - 25
+  config_mlp_hidden_dim:
+  - 400
+  - 200
+  - 100
+  - 50
+  config_mlp_layers: 1
+  pred_mlp_layers: null
+  num_layers: 3
+  task_dim: 10
+  pooling: add
+  jk_mode: lstm
+  GNN: GraphSAGE
+pyg_ranklist:
+  gnn_hidden_dim: 64
+  heads: 4
+  feat_mlp_hidden_dim:
+  - 128
+  - 256
+  - 512
+  - 256
+  feat_mlp_layers: 1
+  feat_mlp_out_dim: 100
+  pooling_mlp_hidden_dim:
+  - 128
+  - 256
+  pooling_mlp_layers: 1
+  pooling_mlp_out_dim: 128
+  pred_mlp_hidden_dim:
+  - 128
+  - 32
+  pred_mlp_layers: null
+  num_layers: 3
+  task_dim: 2
+  pooling: add
+  jk_mode: lstm
+  GNN: GAT
+  dropout: 0.2
+pyg_ranklist_node:
+  gnn_hidden_dim: 300
+  gnn_out_dim: 1
+  num_layers: 3
+  task_dim: 25
+  jk_mode: cat
+  GNN: GAT
+seed: 32
+cpu_threads: 64
