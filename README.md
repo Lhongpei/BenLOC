@@ -1,5 +1,7 @@
 # ML4MOC: A Benchmark for Optimizer Configuration using Machine Learning
 
+<img src="pic/workflow.png" alt="WorkFlow" width="800">
+
 ## Datasets
 
 Presolved Data is stored in `.\instance`.
