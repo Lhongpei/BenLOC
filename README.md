@@ -81,6 +81,13 @@ To split the datasets and create different folds for cross validation, run
        --log_folder "/your/path/to/solving logs" \
        --dataset_name "your_dataset_name" \
    ```
+4. Label extraction from COPT solution log: run
+
+   ```bash
+   python extract_feature/extract_time.py \
+       --log_folder "/your/path/to/solving logs" \
+       --dataset_name "your_dataset_name" \
+   ```
 
 ## Train Random Forest
 
