@@ -53,15 +53,16 @@ def extract(path,log_dir,name):
         df=pd.concat([df,tmp_df], ignore_index=True, axis=0)
     df=df[['File Name','Solve time']].rename(columns={'Solve time': ('-').join(name.split('-')[1:])})
     df = df.sort_values(by="File Name")
+    
+    if not os.path.exists(f'{path}/data'):
+        os.makedirs(f'{path}/data')
     df.to_csv(f'{path}/data/{name}.csv',index=False)
-    return df
 
 def extract_time(path,name):
     subfolders = [f for f in os.listdir(path) if os.path.isdir(os.path.join(path, f))]
     for subfolder in subfolders:
         if subfolder!='data':
             subfolder_path = os.path.join(path, subfolder,'log')
-            print(subfolder_path)
             lst = [subfolder.split('-')[4], subfolder.split('-')[-2],subfolder.split('-')[-1]]
             config_name='-'.join(lst)
             extract(path,subfolder_path,config_name)
