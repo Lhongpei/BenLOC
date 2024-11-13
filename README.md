@@ -23,10 +23,10 @@ python DL/train_gnn_predictor.py \
     --fold 2 \
     --reproData True \ # If you want to reload data
     --default_index 7 \
-    --report_root_path /your/path/to/labels \
-    --problem_root_path /your/path/to/instances \
-    --result_root_path /your/path/to/save_result \
-    --save_model_path /your/path/to/save_model \
+    --report_root_path "/your/path/to/labels" \
+    --problem_root_path "/your/path/to/instances" \
+    --result_root_path "/your/path/to/save_result" \
+    --save_model_path "/your/path/to/save_model" \
     --alpha 0.001 \
     --lr 0.001 \
     --epoch 100 \
