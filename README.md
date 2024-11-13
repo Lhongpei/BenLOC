@@ -66,6 +66,26 @@ To split the datasets and create different folds for cross validation, run
 
 ## Train Random Forest
 
+### Using Original Label
+
+```bash
+python ML/run.py \
+    --label_type original\
+    --dataset "DATASET_YOU_CHOOSE"\
+    --report_root_path "/your/path/to/labels" \
+    --result_root_path "/your/path/to/save_result" \
+```
+
+### Using Log-Scaled Label
+
+```bash
+python ML/run.py \
+    --label_type log_scaled\
+    --dataset "DATASET_YOU_CHOOSE"\
+    --report_root_path "/your/path/to/labels" \
+    --result_root_path "/your/path/to/save_result" \
+```
+
 ## Train GNNs-based Predict Model
 
 ```bash
@@ -73,7 +93,7 @@ python DL/train_gnn_predictor.py \
     --use_wandb True \
     --modeGNN GAT \
     --fold 2 \
-    --reproData True \ # If you want to reload data
+    --reproData True \ 
     --default_index 7 \
     --report_root_path "/your/path/to/labels" \
     --problem_root_path "/your/path/to/instances" \
@@ -83,7 +103,7 @@ python DL/train_gnn_predictor.py \
     --lr 0.001 \
     --epoch 100 \
     --batchsize 32 \
-    --stepsize 10 \
+    --stepsize 10 \ 
     --gamma 0.9
 
 ```
