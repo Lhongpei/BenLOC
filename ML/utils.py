@@ -81,8 +81,14 @@ def _process(data, get_y):
     y = get_y(data)
     return feature, time, X, y
 
+
 def process(data, label_type):
-    return _process(data, get_log_scale_y) if label_type == "log_scaled" else _process(data, get_origin_y)
+    return (
+        _process(data, get_log_scale_y)
+        if label_type == "log_scaled"
+        else _process(data, get_origin_y)
+    )
+
 
 def replace_inf_with_max(arr):
     arr[arr == -np.inf] = -1000
@@ -180,7 +186,7 @@ def run_cross_validation(X_train, y_train, X_test, y_test, index, space):
             min_samples_split=int(best_params.iloc[0, 3]),
             max_features=best_params.iloc[0, 4],
             random_state=42,
-            n_jobs=32,
+            # n_jobs=32,
         )
         logger.info(f"Process_{index} start training")
         rfr.fit(X_train, y_train)
@@ -284,12 +290,21 @@ def accuracy_f(time, y_predict):
     accuracy = accuracy_score(y_label, rf_y_label)
     return pertrue0, pertrue1, per0, per1, accuracy
 
-def get_result(oracle,default,local_min,predict,baseline_col):
-    baseline_name=baseline_col
-    default_time=default
-    baseline=local_min
-    ipv_default=(default-predict)/default
-    ipv_baseline=(baseline-predict)/baseline
-    ipv_oracle=(default-oracle)/default
-    return [baseline_name,default_time,baseline,predict,ipv_default,ipv_baseline,oracle,ipv_oracle]
 
+def get_result(oracle, default, local_min, predict, baseline_col):
+    baseline_name = baseline_col
+    default_time = default
+    baseline = local_min
+    ipv_default = (default - predict) / default
+    ipv_baseline = (baseline - predict) / baseline
+    ipv_oracle = (default - oracle) / default
+    return [
+        baseline_name,
+        default_time,
+        baseline,
+        predict,
+        ipv_default,
+        ipv_baseline,
+        oracle,
+        ipv_oracle,
+    ]
