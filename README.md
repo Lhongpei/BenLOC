@@ -25,9 +25,9 @@ Heterogeneous dataset from [MIPLIB 2017](https://miplib.zib.de/), a well-establi
 
 This dataset consists of instances of the classic Set Covering Problem. Each instance requires finding the minimum number of sets that cover all elements in a universe. The problem is formulated as a MIP problem. This dataset is generated on our own and contains 3994 instances.
 
-#### Independent Set
+#### Maximum Independent Set
 
-This dataset addresses the Independent Set Problem, where the goal is to find the largest set of vertices in a graph such that no two vertices are adjacent. Each instance is modeled as a MIP, with the objective of maximizing the size of the independent set. This dataset is generated on our own and contains 1604 instances.
+This dataset addresses the Maximum Independent Set Problem, where the goal is to find the largest set of vertices in a graph such that no two vertices are adjacent. Each instance is modeled as a MIP, with the objective of maximizing the size of the independent set. This dataset is generated on our own and contains 1604 instances.
 
 #### NN Verification
 
