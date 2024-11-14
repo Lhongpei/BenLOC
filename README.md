@@ -19,23 +19,23 @@ instances/
 
 #### MIPLIB
 
-Heterogeneous dataset from [MIPLIB 2017](https://miplib.zib.de/), a well-established benchmark for evaluating MILP solvers. The dataset includes a diverse set of particularly challenging mixed-integer programming (MIP) instances, each known for its computational difficulty. These instances span various application domains, encompassing problems with different levels of complexity and solution difficulty, making MIPLIB 2017 a rigorous standard for testing the efficacy of MIP solvers in handling hard-to-solve cases.
+Heterogeneous dataset from [MIPLIB 2017](https://miplib.zib.de/), a well-established benchmark for evaluating MILP solvers. The dataset includes a diverse set of particularly challenging mixed-integer programming (MIP) instances, each known for its computational difficulty. 
 
 #### Set Covering
 
-This dataset consists of instances of the classic Set Covering Problem. Each instance requires finding the minimum number of sets that cover all elements in a universe. The problem is formulated as a MIP problem. This dataset is generated on our own and contains 3994 instances.
+This dataset consists of instances of the classic Set Covering Problem, which can be found [here](https://github.com/ds4dm/learn2branch/tree/master). Each instance requires finding the minimum number of sets that cover all elements in a universe. The problem is formulated as a MIP problem. 
 
 #### Maximum Independent Set
 
-This dataset addresses the Maximum Independent Set Problem, where the goal is to find the largest set of vertices in a graph such that no two vertices are adjacent. Each instance is modeled as a MIP, with the objective of maximizing the size of the independent set. This dataset is generated on our own and contains 1604 instances.
+This dataset addresses the Maximum Independent Set Problem, which can be found [here](https://github.com/ds4dm/learn2branch/tree/master). Each instance is modeled as a MIP, with the objective of maximizing the size of the independent set. 
 
 #### NN Verification
 
-This “Neural Network Verification” dataset is to verify whether a neural network is robust to input perturbations can be posed as a MIP. The MIP formulation is described in the paper [On the Effectiveness of Interval Bound Propagation for Training Verifiably Robust Models (Gowal et al., 2018)](https://arxiv.org/abs/1810.12715). Each input on which to verify the network gives rise to a different MIP. In this dataset, a convolutional neural network is verified on each image in the MNIST dataset, giving rise to a corresponding dataset of MIPs. This dataset contains 3104 instances.
+This “Neural Network Verification” dataset is to verify whether a neural network is robust to input perturbations can be posed as a MIP. The MIP formulation is described in the paper [On the Effectiveness of Interval Bound Propagation for Training Verifiably Robust Models (Gowal et al., 2018)](https://arxiv.org/abs/1810.12715). Each input on which to verify the network gives rise to a different MIP. 
 
 #### Load Balancing
 
-This dataset is from [NeurIPS 2021 Competition](https://github.com/ds4dm/ml4co-competition) and it's a hard dataset. This problem deals with apportioning workloads. The apportionment is required to be robust to any worker’s failure. Each instance problem is modeled as a MILP, using a bin-packing with an apportionment formulation. This dataset contains 2286 instances.
+This dataset is from [NeurIPS 2021 Competition](https://github.com/ds4dm/ml4co-competition). This problem deals with apportioning workloads. The apportionment is required to be robust to any worker’s failure. Each instance problem is modeled as a MILP, using a bin-packing with an apportionment formulation.
 
 ### Dataset Spliting
 
