@@ -29,7 +29,7 @@ from tqdm import tqdm
 
 import wandb
 from DL.config.setConfig import create_config
-from DL.dataset_gen.heteroDataset import RankListConfigNamesDataset
+from DL.dataset_gen.heteroDataset import HeteroDataset
 from DL.models.gnn import BiparGAT
 from DL.train.trainer import train_loop, predict_loop
 from DL.utils.loss import *
@@ -107,17 +107,17 @@ if __name__ == '__main__':
     
         print('Processing fold:', fold_step)
         
-        train_dataset = RankListConfigNamesDataset(root = problem_root_path, report_file_root=report_root_path, fold=fold_step, type='train')
+        train_dataset = HeteroDataset(root = problem_root_path, report_file_root=report_root_path, fold=fold_step, type='train')
         print(train_dataset.report_file)
         if reproData:
             train_dataset.process()
-            train_dataset = RankListConfigNamesDataset(root = problem_root_path, report_file_root=report_root_path, fold=fold_step, type='train')
+            train_dataset = HeteroDataset(root = problem_root_path, report_file_root=report_root_path, fold=fold_step, type='train')
         metadata = train_dataset[0]
 
-        test_dataset = RankListConfigNamesDataset(root = problem_root_path, report_file_root=report_root_path, fold=fold_step, type='test')
+        test_dataset = HeteroDataset(root = problem_root_path, report_file_root=report_root_path, fold=fold_step, type='test')
         if reproData:
             test_dataset.process()
-            test_dataset = RankListConfigNamesDataset(root = problem_root_path, report_file_root=report_root_path, fold=fold_step, type='test')
+            test_dataset = HeteroDataset(root = problem_root_path, report_file_root=report_root_path, fold=fold_step, type='test')
 
         train_dataset, valid_dataset = random_split(train_dataset, [int(len(train_dataset)*0.8), len(train_dataset)-int(len(train_dataset)*0.8)])
         train_dataloader = DataLoader(train_dataset, batch_size=config.predict_task.batchsize, shuffle=True, follow_batch=['x_s', 'x_t'])

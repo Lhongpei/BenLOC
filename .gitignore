@@ -1,5 +1,6 @@
 *.pyc
 *.cpython
-*.mps.gz
+
 
 *.pt
+

@@ -16,7 +16,7 @@ from DL.dataset_gen.graphDataset import BipartiteData
 from DL.utils.MIPmodel import MIPmodel
 from DL.utils.utils import *
 from DL.dataset_gen.heteroGraph import *
-class RankListConfigNamesDataset(InMemoryDataset):
+class HeteroDataset(InMemoryDataset):
 
     def __init__(self, root, report_file_root, fold, reprocess=False, type = None, transform=None, pre_transform=None, report_norm=None, if_cat_feat = True):
         """Create a dataset from a folder of files. This dataset is designed for ranking task.
@@ -62,7 +62,7 @@ class RankListConfigNamesDataset(InMemoryDataset):
             self.clear_processed_files()
             print('Reprocessing the dataset')
         print(f'Initializing {self.type} dataset ' + f'of fold {self.fold}')
-        super(RankListConfigNamesDataset, self).__init__(root, transform, pre_transform)
+        super(HeteroDataset, self).__init__(root, transform, pre_transform)
         self.data, self.slices = torch.load(self.processed_paths[0])
         
         if os.path.exists(self.dict_path):
@@ -134,12 +134,12 @@ class RankListConfigNamesDataset(InMemoryDataset):
             data_list.append(data)
         if len(data_list) == 0:
             raise ValueError('No data in the dataset')
-        for data in tqdm(data_list, desc='Normalizing data'):
-            data['vars'].x[:, -1] = data['vars'].x[:, -1]/ self.dict['varMaxScale']
-            data['vars'].x[:, 5] = data['vars'].x[:, 5]/ self.dict['maxObj']
+        # for data in tqdm(data_list, desc='Normalizing data'):
+        #     data['vars'].x[:, -1] = data['vars'].x[:, -1]/ self.dict['varMaxScale']
+        #     data['vars'].x[:, 5] = data['vars'].x[:, 5]/ self.dict['maxObj']
 
-        with open(self.dict_path, 'wb') as f:
-            pickle.dump(self.dict, f)
+        # with open(self.dict_path, 'wb') as f:
+        #     pickle.dump(self.dict, f)
         # Concatenate the list of `Data` objects into a single `Data` object
         data, slices = self.collate(data_list)
         torch.save((data, slices), self.processed_paths[0])
