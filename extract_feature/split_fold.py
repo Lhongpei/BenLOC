@@ -30,6 +30,9 @@ def splitfold(name, time_path, feat_path):
 
     strat_split = StratifiedShuffleSplit(n_splits=10, test_size=0.2, random_state=100)
 
+    all_train_dfs = []
+    all_test_dfs = []
+
     for fold, (train_idx, test_idx) in enumerate(
         strat_split.split(time.iloc[:, 1:], time["min_ratio"]), 1
     ):
@@ -39,9 +42,14 @@ def splitfold(name, time_path, feat_path):
         train_data = df.loc[train_idx]
         test_data = df.loc[test_idx]
 
-        os.makedirs(f"./data/{name}")
+        os.makedirs(f"./data/{name}", exist_ok=True)  # 添加 exist_ok=True 防止目录已存在时报错
         train_data.to_csv(f"./data/{name}/fold_{fold}_train.csv", index=False)
         test_data.to_csv(f"./data/{name}/fold_{fold}_test.csv", index=False)
+
+        all_train_dfs.append(train_data)
+        all_test_dfs.append(test_data)
+
+    return all_train_dfs, all_test_dfs
 
 
 def main():
@@ -70,8 +78,9 @@ def main():
 
     args = parser.parse_args()
 
-    splitfold(args.dataset_name, args.time_path, args.feat_path)
+    all_train_dfs, all_test_dfs =splitfold(args.dataset_name, args.time_path, args.feat_path)
+    return all_train_dfs, all_test_dfs
 
 
 if __name__ == "__main__":
-    main()
+    all_train_dfs, all_test_dfs = main()

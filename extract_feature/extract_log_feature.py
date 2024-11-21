@@ -17,32 +17,43 @@ def parse_log_file(file_path):
         "Nodes",
         "Active",
         "LPit/n",
-        "Depth",
-        "MDpt",
         "IntInf",
-        "GlbFix",
-        "GlbRed",
-        "#Cuts",
-        "MaxEff",
-        "#MCP",
-        "#Sepa",
-        "#Nnz",
-        "#SB",
-        "WorkSb",
-        "#Conf",
-        "Local Bound",
         "BestBound",
         "BestSolution",
         "Gap",
-        "Progr.",
         "Time",
-        "Work",
+        # "Depth",
+        # "MDpt",
+        # "GlbFix",
+        # "GlbRed",
+        # "#Cuts",
+        # "MaxEff",
+        # "#MCP",
+        # "#Sepa",
+        # "#Nnz",
+        # "#SB",
+        # "WorkSb",
+        # "#Conf",
+        # "Local Bound",
+        # "Progr.",
+        # "Work",
     ]
     headers = ["solfndby"] + params_header + info_headers
     row = []
     log_starts = False
+    # pattern = re.compile(
+    #     r"(.?)\s+(\d+)\s+(\d+)\s+([\d.e+-]*|--)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s+([\d.e+-]*|--)\s+([\d.e+-]*|--)\s+([\d.e+-]*|--)\s+([\d.e+-]*\w+|--)\s+([\d.e+-]*|--)\s+([\d.]+)w\s+([\d.e+-]*|--)\s+([\d.e+-]*|--)\s+([\d.e+-]*|--)\s+([\d.e+-]*|--)\s+([\d.e+%Inf]*|--)\s+([\d.eE+%Inf]*|--)\s+([\d.]+)s\s+([\d.]+)w"
+    # )
     pattern = re.compile(
-        r"(.?)\s+(\d+)\s+(\d+)\s+([\d.e+-]*|--)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s+([\d.e+-]*|--)\s+([\d.e+-]*|--)\s+([\d.e+-]*|--)\s+([\d.e+-]*\w+|--)\s+([\d.e+-]*|--)\s+([\d.]+)w\s+([\d.e+-]*|--)\s+([\d.e+-]*|--)\s+([\d.e+-]*|--)\s+([\d.e+-]*|--)\s+([\d.e+%Inf]*|--)\s+([\d.eE+%Inf]*|--)\s+([\d.]+)s\s+([\d.]+)w"
+        r"([H ])\s+"                    # solfndby: H或空格
+        r"(\d+)\s+"                     # Nodes: 数字
+        r"(\d+)\s+"                     # Active: 数字
+        r"([\d.]+|--)\s+"              # LPit/n: 数字或--
+        r"(\d+K?)\s+"                  # IntInf: 数字，可能带K
+        r"([\d.e+-]+)\s+"              # BestBound: 科学计数
+        r"([\d.e+-]+|--)\s+"           # BestSolution: 科学计数或--
+        r"([\d.]+%|Inf)\s+"            # Gap: 百分比或Inf
+        r"([\d.]+)s"                   # Time: 数字+s
     )
     flag = False
     for line in lines:
@@ -190,6 +201,59 @@ def get_prob_stats(filename):
 
     return df
 
+def get_presolve_info(file_path):
+    with open(file_path, "r") as file:
+        lines = file.readlines()
+
+    data = []
+    headers =  ["rows", "columns", "integers"]
+    row_data = []
+    num = []
+    for idx, line in enumerate(lines):
+
+        if "The presolved problem has:" in line:
+            try:
+                next_line = lines[idx + 1].strip()
+                nnline = lines[idx + 2].strip()
+                values = re.findall(r"\d+", next_line)
+                v2 = re.findall(r"\d+", nnline)
+                num = [int(values[0]), int(values[1])]
+                if len(v2) == 2:
+                    num.append(int(v2[1]))
+                else:
+                    num.append(int(v2[0]))
+            except (ValueError, IndexError):
+                # Handle cases where the line format is unexpected
+                continue
+    if len(num) == 3:
+        data.append(row_data + num)
+    df = pd.DataFrame(data, columns=headers)
+    return df
+    
+def parse_log_symmetry(file_path):
+    with open(file_path, "r") as file:
+        lines = file.readlines()
+
+    data = []
+    headers = ["Log Name", "feat_Symmetries"]
+    row_data = []
+    for idx, line in enumerate(lines):
+        # if "The presolved problem has:" in line:
+        if "Symmetry detection:" in line:
+            try:
+                if len(row_data) >= 2:
+                    continue
+                row_data.append(os.path.basename(file_path))
+                s = lines[idx].strip()
+                v = re.findall(r"\d+", s)
+                row_data.append(int(v[0] != "0"))
+                data.append(row_data)
+            except (ValueError, IndexError):
+                # Handle cases where the line format is unexpected
+                continue
+
+    df = pd.DataFrame(data, columns=headers)
+    return df
 
 def extract(dir, name):
     l_dir = [d for d in os.listdir(dir) if name in d and ("MipLogLevel-2" in d)]
@@ -198,13 +262,14 @@ def extract(dir, name):
         tmp_df = parse_log_file(file)
         c_i, c_d, c_p = get_c_i_p_d(tmp_df)
         info_rootend = get_info_rootend(tmp_df, info_headers)
-        prob_stats = get_prob_stats(file)
+        # prob_stats = get_prob_stats(file)
+        presolve_info = get_presolve_info(file)
         log_name = os.path.basename(file)
         file_name = log_name.split(".")[2:]
         file_name = file_name[:-1]
         file_name = ".".join(file_name)
         return (
-            [log_name, file_name, c_i] + info_rootend.to_list() + prob_stats.to_list()
+            [log_name, file_name, c_i] + info_rootend.to_list() + presolve_info.to_list()
         )
 
     def cipd(file):
@@ -234,27 +299,28 @@ def extract(dir, name):
             "Active",
             "LPit/n",
             "IntInf",
-            "GlbFix",
-            "GlbRed",
-            "#Cuts",
-            "#MCP",
-            "#Sepa",
-            "#Conf",
             "BestBound",
             "BestSolution",
             "Gap",
             "Time",
+            # "GlbFix",
+            # "GlbRed",
+            # "#Cuts",
+            # "#MCP",
+            # "#Sepa",
+            # "#Conf",
         ]
-        stats_headers = [
-            "pres_max_A",
-            "pres_min_A",
-            "pres_max_rhs",
-            "pres_min_rhs",
-            "pres_max_obj",
-            "pres_min_obj",
-            "obj_density",
-        ]
-        df_columns = ["Log Name", "File Name", "c_i"] + info_headers + stats_headers
+        # stats_headers = [
+        #     "pres_max_A",
+        #     "pres_min_A",
+        #     "pres_max_rhs",
+        #     "pres_min_rhs",
+        #     "pres_max_obj",
+        #     "pres_min_obj",
+        #     "obj_density",
+        # ]
+        presolve_headers = ["rows", "columns", "integers"]
+        df_columns = ["Log Name", "File Name", "c_i"] + info_headers + presolve_headers
         df_list = []
 
         df_list = Parallel(n_jobs=-1)(

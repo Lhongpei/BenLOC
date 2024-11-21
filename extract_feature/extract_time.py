@@ -87,7 +87,8 @@ def extract_time(path,name):
         'nn_verification': (359.999, 6),
         'setcover': (359.999, 7),
         'indset': (719.999, 7),
-        'load_balance': (3599.999, 7)
+        'load_balance': (3599.999, 7),
+        'miplib':(7199.999, 7)
     }
 
     if name in name_conditions:
