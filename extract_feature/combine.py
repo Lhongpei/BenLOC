@@ -144,7 +144,7 @@ def main():
     )
     args = parser.parse_args()
 
-    combine(args.dataset_name, args.log_folder)
+    combine(args.dataset_name)
 
 
 if __name__ == "__main__":
