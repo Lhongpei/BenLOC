@@ -16,12 +16,12 @@ from ml4moc.ML.utils import (
     get_log_scale_y,
     get_origin_y,
     select_common_rows,
-    get_result
+    get_result,
 )
-
+from ml4moc.params import Params
 
 class ML4MOC:
-    def __init__(self):
+    def __init__(self, params = Params()):
         self.trainner = None
         self.imple_dataset = [
             "setcover",
@@ -34,13 +34,13 @@ class ML4MOC:
         self.test_label, self.test_feat = None, None
         self.label_processed, self.feat_processed = None, None
         self.test_label_processed, self.test_feat_processed = None, None
-        self.label_type = "original"
-        self.default = "MipLogLevel-2"
-        self.shift_scale = 10
+        self.label_type = params.label_type
+        self.default = params.default
+        self.shift_scale = params.shift_scale
         self.train_test_split_flag = False
         self.best_col = None
         self.has_processed = False
-        
+
     def set_label_type(self, label_type: str):
         assert label_type in [
             "log_scaled",
@@ -59,28 +59,35 @@ class ML4MOC:
     def set_train_data(self, feat: pd.DataFrame, label: pd.DataFrame):
         self.has_processed = False
         self.feat, self.label = select_common_rows(feat, label)
-    
+
     def set_test_data(self, test_feat: pd.DataFrame, test_label: pd.DataFrame):
         self.has_processed = False
         self.test_feat, self.test_label = select_common_rows(test_feat, test_label)
         self.train_test_split_flag = True
-        
-        
+
     def process(self):
-        self.feat_processed, self.label_processed = self._preprocess(self.feat, self.label, mode = 'train')
+        self.feat_processed, self.label_processed = self._preprocess(
+            self.feat, self.label, mode="train"
+        )
         if self.train_test_split_flag:
-            self.test_feat_processed, self.test_label_processed = self._preprocess(self.test_feat, self.test_label, mode = 'test')
+            self.test_feat_processed, self.test_label_processed = self._preprocess(
+                self.test_feat, self.test_label, mode="test"
+            )
         self.has_processed = True
-    
-    def _preprocess(self, feat, label, mode = 'train'):
-        if mode == 'train':
-            best_col, best_stf, default_time, oracle = self.baseline(label, self.default)
+
+    def _preprocess(self, feat, label, mode="train"):
+        if mode == "train":
+            best_col, best_stf, default_time, oracle = self.baseline(
+                label, self.default
+            )
             self.best_col = best_col
             self.train_best_stf = best_stf
             self.train_default_time = default_time
             self.train_oracle = oracle
         else:
-            best_stf, default_time, oracle = self.baseline(label, self.default, self.best_col)
+            best_stf, default_time, oracle = self.baseline(
+                label, self.default, self.best_col
+            )
             self.test_best_stf = best_stf
             self.test_default_time = default_time
             self.test_oracle = oracle
@@ -89,7 +96,7 @@ class ML4MOC:
         train_data = preprocess_data(train_data)
         feat, label = process(train_data)
         return feat, label
-        
+
     def train_test_split(self, test_size=0.2):
         feat_train, feat_test, label_train, label_test = train_test_split(
             self.feat, self.label, test_size=test_size, random_state=42, shuffle=True
@@ -97,7 +104,7 @@ class ML4MOC:
         self.train_test_split_flag = True
         self.set_train_data(feat_train, label_train)
         self.set_test_data(feat_test, label_test)
-        
+
     def load_features(self, dataset: str, processed: bool = False):
         assert (
             dataset in self.imple_dataset
@@ -218,7 +225,7 @@ class ML4MOC:
         if col == None:
             data_backup = df.copy()
         data = df
-        
+
         default_time = self.shifted_geometric_mean(data[default])
         column = [
             coln for coln in data.columns if "feat" not in coln and "Name" not in coln
@@ -243,19 +250,21 @@ class ML4MOC:
             return best_col, best_stf, default_time, oracle
         else:
             return self.shifted_geometric_mean(data[col]), default_time, oracle
+
     @property
     def get_processed_X(self):
         if not self.has_processed:
             print("Processing data")
             self.process()
         return self.feat_processed
+
     @property
     def get_processed_Y(self):
         if not self.has_processed:
             print("Processing data")
             self.process()
         return self.label_processed
-    
+
     @property
     def get_X(self):
         return get_X(self.get_processed_X)
@@ -266,11 +275,11 @@ class ML4MOC:
             return get_log_scale_y(self.get_processed_Y)
         else:
             return get_origin_y(self.get_processed_Y)
-        
+
     @property
     def get_test_X(self):
         return get_X(self.test_feat_processed)
-    
+
     @property
     def get_test_Y(self):
         if self.label_type == "log_scaled":
@@ -278,9 +287,11 @@ class ML4MOC:
         else:
             return get_origin_y(self.test_label_processed)
 
-    def evaluate(self, test_feat = None, test_label = None):
+    def evaluate(self, test_feat=None, test_label=None):
         if test_feat is None or test_label is None:
-            assert self.train_test_split_flag, "Haven't set test data, please set test data or use `train_test_split` method to split data."
+            assert (
+                self.train_test_split_flag
+            ), "Haven't set test data, please set test data or use `train_test_split` method to split data."
         else:
             self.set_test_data(test_feat, test_label)
         predict_train = self.trainner.predict(self.get_X)
@@ -321,8 +332,3 @@ class ML4MOC:
         df.loc["train"] = row_train
         df.loc["test"] = row_test
         return df
-    
-        
-        
-            
-        

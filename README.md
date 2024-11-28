@@ -4,134 +4,170 @@
 
 ## Datasets
 
-Presolved Data is stored in `.\instance`. The folder structure after the datasets are set up looks as follows
+See `ml4moc/data/dataset.md` for the introduction.
 
-```bash
-instances/
-  MIPLIB/                   -> 1065 instances
-  set_cover/                -> 3994 instances
-  independent_set/          -> 1604 instances
-  nn_verification/          -> 3104 instances
-  load_balancing/           -> 2286 instances
+## ML4MOC Class Documentation
+
+The `ML4MOC` class is designed to facilitate the training and evaluation of machine learning models for optimization problems. It provides methods for data preprocessing, model selection, training, and evaluation. Below is a step-by-step guide on how to use the class:
+
+---
+
+### 1. **Setting Parameters**
+
+The parameters for the `ML4MOC` class can be set during initialization. You can either pass a `Params` object or use the default parameters.
+
+```python
+from ml4moc.params import Params
+params = Params(default="MipLogLevel-2", label_type="log_scaled", shift_scale=10)
+model = ML4MOC(params)
 ```
 
-### Dataset Description
+- **label_type**: Specifies whether the labels are scaled (`log_scaled`) or in their original form (`original`).
+- **default**: The column name representing the default time in the dataset.
+- **shift_scale**: The scale used for the geometric mean during the baseline calculation.
 
-#### MIPLIB
+---
 
-Heterogeneous dataset from [MIPLIB 2017](https://miplib.zib.de/), a well-established benchmark for evaluating MILP solvers. The dataset includes a diverse set of particularly challenging mixed-integer programming (MIP) instances, each known for its computational difficulty. 
+### 2. **Setting the Learner (Model)**
 
-#### Set Covering
+You can set a model (e.g., `RandomForestRegressor`) as the trainer for the `ML4MOC` class using the `set_trainner` method.
 
-This dataset consists of instances of the classic Set Covering Problem, which can be found [here](https://github.com/ds4dm/learn2branch/tree/master). Each instance requires finding the minimum number of sets that cover all elements in a universe. The problem is formulated as a MIP problem. 
-
-#### Maximum Independent Set
-
-This dataset addresses the Maximum Independent Set Problem, which can be found [here](https://github.com/ds4dm/learn2branch/tree/master). Each instance is modeled as a MIP, with the objective of maximizing the size of the independent set. 
-
-#### NN Verification
-
-This “Neural Network Verification” dataset is to verify whether a neural network is robust to input perturbations can be posed as a MIP. The MIP formulation is described in the paper [On the Effectiveness of Interval Bound Propagation for Training Verifiably Robust Models (Gowal et al., 2018)](https://arxiv.org/abs/1810.12715). Each input on which to verify the network gives rise to a different MIP. 
-
-#### Load Balancing
-
-This dataset is from [NeurIPS 2021 Competition](https://github.com/ds4dm/ml4co-competition). This problem deals with apportioning workloads. The apportionment is required to be robust to any worker’s failure. Each instance problem is modeled as a MILP, using a bin-packing with an apportionment formulation.
-
-### Dataset Spliting
-
-Each dataset was split into a training set  $D_{\text{train}}$ and a testing set $D_{\text{test}}$, following an approximate 80-20 split. Moreover, we split the dataset by time and "optimality", which means according to the proportion of optimality for each parameter is similar in training and testing sets. This ensures a balanced representation of both temporal variations and the highest levels of parameter efficiency in our data partitions.
-
-To split the datasets and create different folds for cross validation, run
-
-```bash
-   python extract_feature/split_fold.py \
-       --dataset_name "your_dataset_name" \
-       --time_path "/your/path/to/soving times" \
-       --feat_path "/your/path/to/features" \
-   ``` 
-
-## Handcraft Feature Extraction
-
-**Folder:** ```extract_feature```
-
-**Problem format:** ```your_file.mps.gz``` or ```your_file.lp```
-
-**Log format:** ```your_file.log```
-
-1. Static feature extraction for MIP problems: run
-
-   ```bash
-   python extract_feature/extract_problem.py \
-       --problem_folder "/your/path/to/instances" \
-       --dataset_name "your_dataset_name" \
-   ```
-
-2. Extract other features from COPT solution log: run
-
-   ```bash
-   python extract_feature/extract_log_feature.py \
-       --log_folder "/your/path/to/solving logs" \
-       --dataset_name "your_dataset_name" \
-   ```
-
-3. Feature combination and preprocessing: run
-
-   ```bash
-   python extract_feature/combine.py \
-       --dataset_name "your_dataset_name" \
-   ```
-4. Label extraction from COPT solution log: run
-
-   ```bash
-   python extract_feature/extract_time.py \
-       --log_folder "/your/path/to/solving logs" \
-       --dataset_name "your_dataset_name" \
-   ```
-
-## Train Random Forest
-
-### Using Original Label
-
-```bash
-python ML/run.py \
-    --label_type original\
-    --dataset "DATASET_YOU_CHOOSE"\
-    --report_root_path "/your/path/to/labels" \
-    --result_root_path "/your/path/to/save_result" \
+```python
+from sklearn.ensemble import RandomForestRegressor
+model.set_trainner(RandomForestRegressor(verbose=1))
 ```
 
-### Using Log-Scaled Label
+- **RandomForestRegressor**: A random forest regressor model is used as the default estimator for the training process. You can also use other sklearn estimators, such as `LinearRegression`, `SVR`, etc. 
+- If you want to adapt customized estimator, please provide APIs of `model.fit()` and `model.predict()` just like sklearn's APIs.
 
-```bash
-python ML/run.py \
-    --label_type log_scaled\
-    --dataset "DATASET_YOU_CHOOSE"\
-    --report_root_path "/your/path/to/labels" \
-    --result_root_path "/your/path/to/save_result" \
+---
+
+### 3. **Setting the Dataset**
+
+You can set our datasets or input your datasets.
+
+#### Loading Provided labeled Datasets
+
+You can load a dataset using the `load_dataset` method. The dataset will include both features and labels, and can be processed optionally.
+
+```python
+model.load_dataset("setcover", processed=True, verbose=True)
 ```
 
-## Train GNNs-based Predict Model
+- **dataset**: The dataset to be loaded (e.g., `setcover`, `indset`, `nn_verification`, etc.).
+- **processed**: If set to `True`, it loads the processed version of the dataset.
+- **verbose**: If set to `True`, it prints information about the dataset.
 
-```bash
-python DL/train_gnn_predictor.py \
-    --use_wandb True \
-    --modeGNN GAT \
-    --fold 2 \
-    --reproData True \ 
-    --default_index 7 \
-    --report_root_path "/your/path/to/labels" \
-    --problem_root_path "/your/path/to/instances" \
-    --result_root_path "/your/path/to/save_result" \
-    --save_model_path "/your/path/to/save_model" \
-    --alpha 0.001 \
-    --lr 0.001 \
-    --epoch 100 \
-    --batchsize 32 \
-    --stepsize 10 \ 
-    --gamma 0.9
+After loading the dataset, the `feat` (features) and `label` (labels) are stored, and preprocessing can be applied as needed.
 
+#### Input Datasets
+
+```python
+model.set_train_data(Feature, Label)
+#model.set_test_data(Test_Feature, Test_Label) (OPTIONAL)
 ```
 
-## Train VGAE\GAE and Predict
+Both `Feature` and `Label` should be the type of `pandas.DataFrame`. Please follow our formats!
 
-## Reference
+*If you want use `model.evaluation`, you can either set test datasets or only set train datasets and use train-test-split.*
+
+---
+
+### 4. **Train-Test Split**
+
+*If you have set test dataset, please skip this step.*
+
+To split the dataset into training and testing sets, you can use the `train_test_split` method.
+
+```python
+model.train_test_split(test_size=0.2)
+```
+
+- **test_size**: Fraction of the data to be used as the test set (e.g., `0.2` means 20% for testing, 80% for training).
+
+This will divide the features and labels into training and testing sets and preprocess the data accordingly.
+
+---
+
+### 5. **Fitting the Model**
+
+Once the dataset is loaded and the model is set, you can fit the model using the `fit` method.
+
+```python
+model.fit()
+```
+
+The `fit` method will train the model using the processed features (`X`) and labels (`Y`).
+
+- The model is trained on the processed training data using the `trainner` model set earlier.
+
+---
+
+### 6. **Evaluating the Model**
+
+After training, you can evaluate the model using the `evaluate` method. This method will make predictions on both the training and testing datasets and return a DataFrame with evaluation results.
+
+```python
+evaluation_results = model.evaluate()
+```
+
+- **evaluation_results**: A DataFrame containing the evaluation results, including the baseline, default time, model prediction time, and oracle performance for both training and testing datasets.
+
+The evaluation method returns the following columns:
+
+- **baseline_name**: Name of the baseline method used.
+- **default_time**: Default time using the baseline method.
+- **baseline_time**: Time predicted by the baseline method.
+- **rf_time**: Time predicted by the random forest model.
+- **ipv_default**: The improvement in performance relative to the baseline (train).
+- **ipv_baseline**: The improvement in performance relative to the baseline (test).
+- **oracle**: The optimal oracle time.
+- **ipv_oracle**: The improvement relative to the oracle.
+
+---
+
+### **Estimator Parameters Selection** (Optional)
+
+we support use sklearn's model-selection methods to select parameters.
+
+```python
+model.cross_validation(CVer, parameters_space log_name)
+```
+
+if you use `RandomForest`, `LightGBM` or `GBDT`, we will support our parameters space as default.
+
+Use following commands to check our parameters space.
+
+```python
+model.rfr_parameter_space
+model.lgbm_parameter_space
+model.gbdt_parameter_space
+```
+
+### Example Usage Flow
+
+```python
+# Step 1: Initialize the model with parameters
+from ml4moc.params import Params
+params = Params(default="MipLogLevel-2", label_type="log_scaled", shift_scale=10)
+model = ML4MOC(params)
+
+# Step 2: Set the machine learning model (e.g., Random Forest)
+from sklearn.ensemble import RandomForestRegressor
+model.set_trainner(RandomForestRegressor(verbose=1))
+
+# Step 3: Load the dataset and preprocess
+model.load_dataset("setcover", processed=True, verbose=True)
+
+# Step 4: Split the dataset into training and test sets
+model.train_test_split(test_size=0.2)
+
+# Step 5: Train the model
+model.fit()
+
+# Step 6: Evaluate the model and get results
+evaluation_results = model.evaluate()
+
+# Output evaluation results
+print(evaluation_results)
+```
