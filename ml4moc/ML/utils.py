@@ -14,11 +14,15 @@ import pandas as pd
 import logging
 import os
 from sklearn.metrics import mean_squared_error, accuracy_score
+def select_common_rows(df1, df2):
+    common_file_names = set(df1["File Name"]).intersection(set(df2["File Name"]))
+
+    df1 = df1[df1["File Name"].isin(common_file_names)].reset_index(drop=True)
+    df2 = df2[df2["File Name"].isin(common_file_names)].reset_index(drop=True)
+    return df1, df2
 
 
-def preprocess(file):
-    data = pd.read_csv(file)
-
+def preprocess_data(data):
     column = [col for col in data.columns if "feat" not in col and "Name" not in col]
 
     data["min_time"] = data[column].min(axis=1)
@@ -61,35 +65,28 @@ def baseline(df:pd.DataFrame, default, col=None):
         best_col = None
         for col in column:
             sft_time = shifted_geometric_mean(data[col], 10)
-            print(col, sft_time)
+
             if sft_time < min_stf:
                 best_stf = sft_time
                 best_col = col
                 min_stf = sft_time
-                print(min_stf, best_col)
+
         return best_col, best_stf, default_time, oracle
     else:
         return shifted_geometric_mean(data[col], 10), default_time, oracle
 
 
-def _process(data, get_y):
+def process(data):
     columns = data.columns.tolist()
     data.columns = columns
     time_col = ["File Name", "time"]
     feature_col = ["File Name"] + [col for col in data.columns if "feat" in col]
     time = data[time_col]
     feature = data[feature_col]
-    X = get_X(feature)
-    y = get_y(data)
-    return feature, time, X, y
+    return feature, time
 
 
-def process(data, label_type):
-    return (
-        _process(data, get_log_scale_y)
-        if label_type == "log_scaled"
-        else _process(data, get_origin_y)
-    )
+
 
 
 def replace_inf_with_max(arr):
@@ -310,3 +307,102 @@ def get_result(oracle, default, local_min, predict, baseline_col):
         oracle,
         ipv_oracle,
     ]
+
+def combine(name):
+    df = pd.read_csv(f"./data/parsed_log_{name}_new.csv")
+    df_cidp = pd.read_csv(f"./data/parsed_log_cidp_{name}.csv")
+    
+    df["pre_row"] = np.log(df["rows"].astype(float))
+    df["pre_columns"] = np.log(df["columns"].astype(float))
+    df["preinteger"] = df["integers"].astype(float) / df["columns"].astype(float)
+    merged_df = df.drop(["rows", "columns", "integers"], axis=1)
+    merged_df = pd.merge(
+        merged_df, df_cidp, on=["Log Name", "File Name", "c_i"], how="inner"
+    )
+
+    dynamic["DualInitialGap"] = dynamic.apply(
+        lambda row: (
+            0
+            if (abs(row["c_i"]) == 0 or abs(row["BestBound"]) == 0)
+            else abs(row["c_i"] - row["BestBound"])
+            / max(
+                abs(row["c_i"]),
+                abs(row["BestBound"]),
+                abs(row["c_i"] - row["BestBound"]),
+            )
+        ),
+        axis=1,
+    )
+    dynamic["PrimalDualGap"] = dynamic.apply(
+        lambda row: (
+            0
+            if (abs(row["BestSolution"]) == 0 or abs(row["BestBound"]) == 0)
+            else abs(row["BestSolution"] - row["BestBound"])
+            / max(
+                abs(row["BestSolution"]),
+                abs(row["BestBound"] - row["BestSolution"]),
+                abs(row["BestBound"]),
+            )
+        ),
+        axis=1,
+    )
+    dynamic["PrimalInitialGap"] = dynamic.apply(
+        lambda row: (
+            0
+            if (abs(row["c_i"]) == 0 or abs(row["BestSolution"]) == 0)
+            else abs(row["c_i"] - row["BestSolution"])
+            / max(
+                abs(row["c_i"]),
+                abs(row["BestSolution"]),
+                abs(row["BestSolution"] - row["c_i"]),
+            )
+        ),
+        axis=1,
+    )
+
+    def calculate_gap_closed(row):
+        if row["PrimalDualGap"] == 0 and row["DualInitialGap"] == 0:
+            return 0
+        elif row["DualInitialGap"] == 0:
+            return float("-inf")
+        else:
+            return 1 - row["PrimalDualGap"] / row["DualInitialGap"]
+
+    dynamic["GapClosed"] = dynamic.apply(calculate_gap_closed, axis=1)
+    dynamic = dynamic.drop(["c_i", "BestBound", "BestSolution", "c_d", "c_p"], axis=1)
+    print(dynamic.shape)
+
+    feature_ori = pd.read_csv(f"./data/features_{name}_ori.csv")
+    feature_ori = feature_ori.rename(columns={"File Name": "Name"})
+    if "nn" in name:
+        feature_ori["File Name"] = (
+            feature_ori["Name"].astype(str).apply(lambda x: x[:-3])
+        )
+    else:
+        feature_ori["File Name"] = (
+            feature_ori["Name"].astype(str).apply(lambda x: x[:-7])
+        )
+    feature_ori = feature_ori.drop(
+        ["Name", "RHS_dynamic", "obj_dynamic", "Coe_dynamic"], axis=1
+    )
+    merge = pd.merge(dynamic, feature_ori, on="File Name", how="left")
+
+    # merge = merge.replace([np.nan], 0)
+    # merge['RHS_dynamic']= merge['RHS_dynamic'].replace([np.inf], 0)
+    new_column_names = [
+        "feat_" + col if i >= 2 else col for i, col in enumerate(merge.columns)
+    ]
+    merge.columns = new_column_names
+
+    # symmetry = pd.DataFrame()
+    # df_list = []
+    # for file in log_files_def:
+    #     tmp_df = parse_log_symmetry(file)
+    #     df_list.append(tmp_df)
+    # symmetry = pd.concat(df_list, ignore_index=True, axis=0)
+    # symmetry=symmetry.fillna(0)
+
+    # final_df = pd.merge(merge, symmetry, on="Log Name", how="left")
+    final_df = merge
+    print(final_df.shape)
+    final_df.to_csv(f"./data/feat_{name}.csv", index=False)
