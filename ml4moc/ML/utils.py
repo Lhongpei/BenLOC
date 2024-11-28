@@ -42,8 +42,10 @@ def preprocess(file):
     return data
 
 
-def baseline(file, default, col=None):
-    data = pd.read_csv(file)
+def baseline(df:pd.DataFrame, default, col=None):
+    if col == None:
+        data_backup = df.copy()
+    data = df
     default_time = shifted_geometric_mean(data[default], 10)
     column = [
         coln for coln in data.columns if "feat" not in coln and "Name" not in coln
@@ -52,7 +54,7 @@ def baseline(file, default, col=None):
     oracle = shifted_geometric_mean(data["min_time"], 10)
     if col == None:
         default_time = shifted_geometric_mean(data[default], 10)
-        data = pd.read_csv(file)
+        data = data_backup
 
         min_stf = 100000000000
         best_stf = 0
