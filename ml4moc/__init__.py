@@ -1,6 +1,6 @@
 import os
 import sys
 sys.path.append(os.path.abspath(os.path.dirname(__file__)))
-from .main import *
+from .ml_main import *
 from .ML.utils import *
 from .params import *

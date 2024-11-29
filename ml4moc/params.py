@@ -1,8 +1,5 @@
 class Params:
     def __init__(self, **kwargs):
-        self.shift_scale = 10
-        self.label_type = 'log_scaled'
-        self.default = "MipLogLevel-2"
         self.__dict__.update(kwargs)
 
     def set_params(self, **kwargs):
@@ -25,3 +22,21 @@ class Params:
             return self.__dict__[key]
         except KeyError:
             raise AttributeError(f"'Params' object has no attribute '{key}'")
+        
+class DLParams(Params):
+    def __init__(self, **kwargs):
+        self.label_type: str = "log_scaled", 
+        self.default: int = 0, 
+        self.shift_scale: float = 1.0, 
+        self.train_test_split_ratio: float = 0.8, 
+        self.random_seed: int = 42,
+        self.hyperparams: dict = None
+        super().__init__(**kwargs)
+        
+class MLParams(Params):
+    def __init__(self, **kwargs):
+        self.shift_scale = 10
+        self.label_type = 'log_scaled'
+        self.default = "MipLogLevel-2"
+        super().__init__(**kwargs)
+        

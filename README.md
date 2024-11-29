@@ -2,23 +2,21 @@
 
 <img src="pic/workflow.png" alt="WorkFlow" width="800">
 
+The `ML4MOC` class is designed to facilitate the training and evaluation of machine learning models for optimization problems. It provides methods for data preprocessing, model selection, training, and evaluation. Below is a step-by-step guide on how to use the class:
+
 ## Datasets
 
 See `ml4moc/data/dataset.md` for the introduction.
 
-## ML4MOC Class Documentation
-
-The `ML4MOC` class is designed to facilitate the training and evaluation of machine learning models for optimization problems. It provides methods for data preprocessing, model selection, training, and evaluation. Below is a step-by-step guide on how to use the class:
-
----
+## ML4MOC: Machine Learning API
 
 ### 1. **Setting Parameters**
 
 The parameters for the `ML4MOC` class can be set during initialization. You can either pass a `Params` object or use the default parameters.
 
 ```python
-from ml4moc.params import Params
-params = Params(default="MipLogLevel-2", label_type="log_scaled", shift_scale=10)
+from ml4moc import MLParams
+params = MLParams(default="MipLogLevel-2", label_type="log_scaled", shift_scale=10)
 model = ML4MOC(params)
 ```
 
@@ -80,12 +78,18 @@ Both `Feature` and `Label` should be the type of `pandas.DataFrame`. Please foll
 To split the dataset into training and testing sets, you can use the `train_test_split` method.
 
 ```python
-model.train_test_split(test_size=0.2)
+model.train_test_split(test_size)
 ```
 
 - **test_size**: Fraction of the data to be used as the test set (e.g., `0.2` means 20% for testing, 80% for training).
 
 This will divide the features and labels into training and testing sets and preprocess the data accordingly.
+
+Also, you can use lists including the partition to split train and test datasets.
+
+```python
+model.train_test_split_by_name(train_subset_names, test_subset_names)
+```
 
 ---
 
@@ -170,4 +174,160 @@ evaluation_results = model.evaluate()
 
 # Output evaluation results
 print(evaluation_results)
+```
+
+## ML4MOC: Deep Learning Methods
+
+### **1. Set Up the Environment**
+
+Before running the script, ensure the following:
+- Required packages (e.g., PyTorch, wandb, etc.) are installed.
+- Your dataset is prepared and accessible.
+- Set up the directory for saving models and results.
+
+---
+
+### **2. Define Parameters**
+
+Create a `params` object to store the configurations required for training. These include paths, training hyperparameters, and model settings.
+
+```python
+params = {
+    "use_wandb": True,                  # Enable wandb logging
+    "modeGNN": "GAT",                   # Type of GNN to use (e.g., "GAT", "GCN")
+    "fold": 2,                          # Fold for cross-validation
+    "reproData": False,                 # Enable reproducibility
+    "default_index": 7,                 # Default problem index
+    "report_root_path": "repo/reports", # Path for reports
+    "problem_root_path": "./data",      # Path to problem data
+    "batchsize": 32,                    # Batch size for training
+    "epoch": 100,                       # Number of training epochs
+    "lr": 0.001,                        # Learning rate
+    "stepsize": 10,                     # Step size for LR scheduler
+    "gamma": 0.9,                       # Gamma for LR scheduler
+    "save_model_path": "./models",      # Directory to save models
+    "result_root_path": "./results",    # Directory to save results
+    "nn_config": {                      # Model-specific configurations
+        "hidden_dim": 64,
+        "num_heads": 8,
+    },
+    "seed": 42                          # Random seed for reproducibility
+}
+```
+
+---
+
+### **3. Create the Trainer Instance**
+
+Initialize the `GNNTrainer` with the defined parameters.
+
+```python
+trainer = GNNTrainer(params)
+```
+
+---
+
+### **4. Set Up the Training Environment**
+
+Configure seeds and initialize wandb if enabled. Run this step to ensure consistent results across runs.
+
+```python
+trainer.setup_environment()
+```
+
+---
+
+### **5. Load and Prepare the Dataset**
+
+Load your dataset and split it into training, validation, and test sets. Dataloaders are prepared internally.
+
+```python
+trainer.load_data()
+```
+
+---
+
+### **6. Build the Model**
+
+Initialize the GNN model, optimizer, and scheduler. Ensure the model is set to the appropriate device (CPU/GPU).
+
+```python
+trainer.build_model()
+```
+
+---
+
+### **7. Train and Validate the Model**
+
+Train the model for the specified number of epochs and validate performance at the end of each epoch. The best model is saved automatically.
+
+```python
+trainer.train_and_evaluate()
+```
+
+---
+
+### **8. Test the Model**
+
+Evaluate the final model on the test dataset and print or save the results.
+
+```python
+test_results = trainer.test_model()
+print("Test Results:", test_results)
+```
+
+---
+
+### **9. Save Results**
+
+Save the results of training and testing to a specified directory for further analysis.
+
+```python
+trainer.save_results()
+```
+
+---
+
+### **10. Run the Entire Pipeline**
+
+For convenience, you can call the `run` method, which executes all the above steps sequentially.
+
+```python
+trainer.run()
+```
+
+---
+
+### **Example Full Script**
+
+```python
+# Import necessary libraries
+from trainer import GNNTrainer  # Assuming your trainer is saved as trainer.py
+
+# Define parameters
+params = {
+    "use_wandb": True,
+    "modeGNN": "GAT",
+    "fold": 2,
+    "reproData": False,
+    "default_index": 7,
+    "report_root_path": "repo/reports",
+    "problem_root_path": "./data",
+    "batchsize": 32,
+    "epoch": 100,
+    "lr": 0.001,
+    "stepsize": 10,
+    "gamma": 0.9,
+    "save_model_path": "./models",
+    "result_root_path": "./results",
+    "nn_config": {
+        "hidden_dim": 64,
+        "num_heads": 8,
+    },
+    "seed": 42,
+}
+
+# Initialize and run the trainer
+trainer = GNNTrainer(params)
+trainer.run()
 ```
