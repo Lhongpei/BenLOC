@@ -225,6 +225,12 @@ Initialize the `GNNTrainer` with the defined parameters.
 trainer = GNNTrainer(params)
 ```
 
+If you want to customize model, you can set your model by:
+
+```python
+trainer.set_model(YOUR_MODEL)
+```
+
 ---
 
 ### **4. Set Up the Training Environment**
