@@ -1,4 +1,4 @@
-# ML4MOC: A Benchmark for Optimizer Configuration using Machine Learning
+# BenLOC: A Benchmark of Learning to MIP Optimizer Configuration.
 ![image](https://github.com/user-attachments/assets/a99fe4ae-5375-48c6-a17f-f6863b7b8df6)
 
 <img src="pic/workflow.png" alt="WorkFlow" width="800">
