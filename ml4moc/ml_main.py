@@ -125,10 +125,10 @@ class ML4MOC:
         self.set_train_test_data((feat_train, label_train), (feat_test, label_test))
     #TODO: Test this method 
     def train_test_split_by_splitfile(self, split_file: str):
-        with open(split_file, "r") as f:
+        with open(split_file, "rb") as f:
             pickle_list = pickle.load(f)
-        train_list = pickle_list[0]
-        test_list = pickle_list[1]
+        train_list = pickle_list['train']
+        test_list = pickle_list['test']
         self.train_test_split_by_name(train_list, test_list)
         
             
@@ -138,16 +138,16 @@ class ML4MOC:
             dataset in self.imple_dataset
         ), f"dataset should be one of the following: {self.imple_dataset}"
         self.feat = (
-            pd.read_csv(f"ml4moc/data/feat/feat_{dataset}.csv")
+            pd.read_csv(f"./ml4moc/data/feat/feat_{dataset}.csv")
             if not processed
-            else pd.read_csv(f"ml4moc/data/feat/feat_{dataset}_processed.csv")
+            else pd.read_csv(f"./ml4moc/data/feat/feat_{dataset}_processed.csv")
         )
 
     def load_labels(self, dataset: str):
         assert (
             dataset in self.imple_dataset
         ), f"dataset should be one of the following: {self.imple_dataset}"
-        self.label = pd.read_csv(f"ml4moc/data/time/time_{dataset}.csv")
+        self.label = pd.read_csv(f"./ml4moc/data/time/time_{dataset}.csv")
 
     def load_dataset(self, dataset: str, processed: bool = True, verbose: bool = False):
         self.load_features(dataset, processed)
