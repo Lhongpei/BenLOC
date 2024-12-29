@@ -5,6 +5,7 @@ from sklearn.model_selection import GridSearchCV, train_test_split
 from sklearn.metrics import mean_squared_error
 import numpy as np
 import pandas as pd
+import pickle
 import logging
 import sklearn.model_selection
 from ml4moc.ML.utils import (
@@ -100,14 +101,38 @@ class ML4MOC:
         feat, label = process(train_data)
         return feat, label
 
+    #-----------------------------------------------------------------
+    # About Splitting Data
+    def set_train_test_data(self, train_feat_label, test_feat_label):
+        self.set_train_data(train_feat_label[0], train_feat_label[1])
+        self.set_test_data(test_feat_label[0], test_feat_label[1])
+        self.train_test_split_flag = True
+    
     def train_test_split(self, test_size=0.2):
         feat_train, feat_test, label_train, label_test = train_test_split(
             self.feat, self.label, test_size=test_size, random_state=42, shuffle=True
         )
-        self.train_test_split_flag = True
-        self.set_train_data(feat_train, label_train)
-        self.set_test_data(feat_test, label_test)
-
+        self.set_train_test_data((feat_train, label_train), (feat_test, label_test))
+        
+    #TODO: Test this method
+    def train_test_split_by_name(self, train_name:list, test_name:list):
+        feat_with_name_index = self.feat.set_index("File Name")
+        label_with_name_index = self.label.set_index("File Name")
+        feat_train = feat_with_name_index.loc[train_name].reset_index()
+        feat_test = feat_with_name_index.loc[test_name].reset_index()
+        label_train = label_with_name_index.loc[train_name].reset_index()
+        label_test = label_with_name_index.loc[test_name].reset_index()
+        self.set_train_test_data((feat_train, label_train), (feat_test, label_test))
+    #TODO: Test this method 
+    def train_test_split_by_splitfile(self, split_file: str):
+        with open(split_file, "r") as f:
+            pickle_list = pickle.load(f)
+        train_list = pickle_list[0]
+        test_list = pickle_list[1]
+        self.train_test_split_by_name(train_list, test_list)
+        
+            
+    #-----------------------------------------------------------------
     def load_features(self, dataset: str, processed: bool = False):
         assert (
             dataset in self.imple_dataset
@@ -223,7 +248,7 @@ class ML4MOC:
 
     def shifted_geometric_mean(self, data):
         return shifted_geometric_mean(data, self.shift_scale)
-
+    
     def baseline(self, df: pd.DataFrame, default, col=None):
         if col == None:
             data_backup = df.copy()
