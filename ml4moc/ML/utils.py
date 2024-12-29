@@ -23,14 +23,16 @@ def select_common_rows(df1, df2):
 
 
 def preprocess_data(data):
-    column = [col for col in data.columns if "feat" not in col and "Name" not in col]
+    column = [col for col in data.columns if "feat" not in col and "Name" not in col and 'timelabel' not in col]
+    timelabel_col = [col for col in column if 'timelabel' in col]
 
     data["min_time"] = data[column].min(axis=1)
 
     id_var = [col for col in data.columns if col not in column]
 
     data = data.melt(
-        id_vars=id_var, value_vars=column, var_name="configuration", value_name="time"
+        id_vars=id_var, value_vars=column, var_name="configuration", 
+        value_name = "timelabel_time", 
     )
 
     config = pd.DataFrame(
@@ -42,7 +44,6 @@ def preprocess_data(data):
         config.at[index, f"feat_{col}"] = 1
 
     data = pd.concat([data, config], axis=1)
-
     return data
 
 
@@ -79,9 +80,10 @@ def baseline(df:pd.DataFrame, default, col=None):
 def process(data):
     columns = data.columns.tolist()
     data.columns = columns
-    time_col = ["File Name", "time"]
+    time_col = ["File Name"] + [col for col in data.columns if "timelabel" in col]
     feature_col = ["File Name"] + [col for col in data.columns if "feat" in col]
     time = data[time_col]
+    time.columns = [col.replace('timelabel_', '') for col in time.columns]
     feature = data[feature_col]
     return feature, time
 

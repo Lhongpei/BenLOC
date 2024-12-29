@@ -93,7 +93,9 @@ class ML4MOC:
             self.test_default_time = default_time
             self.test_oracle = oracle
 
+        
         train_data = pd.merge(feat, label, on="File Name", how="inner")
+        train_data['timelabel_default'] = train_data[self.default]
         train_data = preprocess_data(train_data)
         feat, label = process(train_data)
         return feat, label
