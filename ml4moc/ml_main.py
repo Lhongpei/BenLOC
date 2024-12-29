@@ -19,7 +19,7 @@ from ml4moc.ML.utils import (
     get_result,
 )
 from ml4moc.params import Params
-from ml4moc.log_logo import log_init
+from ml4moc.logger import log_init
 class ML4MOC:
     @log_init
     def __init__(self, params = Params()):
