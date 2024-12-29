@@ -19,8 +19,9 @@ from ml4moc.ML.utils import (
     get_result,
 )
 from ml4moc.params import Params
-
+from ml4moc.log_logo import log_init
 class ML4MOC:
+    @log_init
     def __init__(self, params = Params()):
         self.trainner = None
         self.imple_dataset = [
@@ -40,7 +41,7 @@ class ML4MOC:
         self.train_test_split_flag = False
         self.best_col = None
         self.has_processed = False
-
+        
     def set_label_type(self, label_type: str):
         assert label_type in [
             "log_scaled",
