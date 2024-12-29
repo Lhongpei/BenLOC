@@ -103,7 +103,7 @@ class BenLOCLogger:
         # print("  - Run `python main.py` to start.")
         # print("  - Use `python main.py --help` for command-line options.")
         # print("  - Documentation: <link to documentation>")
-        print(f"{Fore.YELLOW}Tip: Ensure CUDA is installed for optimal performance.{Style.RESET_ALL}")
+        # print(f"{Fore.YELLOW}Tip: Ensure CUDA is installed for optimal performance.{Style.RESET_ALL}")
         BenLOCLogger.print_frame()
 
 
