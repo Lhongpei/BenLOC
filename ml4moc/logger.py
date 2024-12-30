@@ -11,7 +11,7 @@ init(autoreset=True)
 class BenLOCConfig:
     """Configuration for the BenLOC library."""
     VERSION = "1.0.0"
-    TEAM_NAME = "SUFE & Cardinal Optimizer Team"
+    TEAM_NAME = "SJTU & SUFE & Cardinal Optimizer Team"
     CONTACT_EMAIL = "ishongpeili@gmail.com"
     CORE_FEATURES = [
         "Dataset integration for MIP problems",
