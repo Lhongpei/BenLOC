@@ -16,8 +16,8 @@ See `ml4moc/data/dataset.md` for the introduction.
 The parameters for the `ML4MOC` class can be set during initialization. You can either pass a `Params` object or use the default parameters.
 
 ```python
-from ml4moc import MLParams
-params = MLParams(default="MipLogLevel-2", label_type="log_scaled", shift_scale=10)
+from ml4moc import TabParams
+params = TabParams(default="MipLogLevel-2", label_type="log_scaled", shift_scale=10)
 model = ML4MOC(params)
 ```
 

@@ -8,6 +8,14 @@ import pandas as pd
 import pickle
 import logging
 import sklearn.model_selection
+import torch
+from pytorch_lightning import Trainer
+from pytorch_lightning.callbacks import LearningRateMonitor, ModelCheckpoint
+from pytorch_lightning.callbacks.progress import TQDMProgressBar
+from pytorch_lightning.loggers import WandbLogger
+from pytorch_lightning.strategies.ddp import DDPStrategy
+from pytorch_lightning.utilities import rank_zero_info
+
 from ml4moc.ML.utils import (
     setup_logger,
     process,
@@ -21,6 +29,8 @@ from ml4moc.ML.utils import (
 )
 from ml4moc.params import Params
 from ml4moc.logger import log_init
+from ml4moc.pyl_main import TabModel
+import wandb, os
 class ML4MOC:
     @log_init
     def __init__(self, params = Params()):
@@ -32,6 +42,7 @@ class ML4MOC:
             "load_balance",
             "miplib",
         ]
+        self.params = params
         self.label, self.feat = None, None
         self.test_label, self.test_feat = None, None
         self.label_processed, self.feat_processed = None, None
@@ -165,12 +176,71 @@ class ML4MOC:
             self.load_dataset(dataset, verbose)
         return self.feat, self.label
 
-    def set_trainner(self, model: sklearn.base.BaseEstimator):
+    def set_trainner(self, model):
         self.trainner = model
-
+        if isinstance(model, torch.nn.Module):
+            print("Using PyTorch Module, it will set a PyTorch_Lightning model")
+            self.trainner = TabModel(model, self.params)
+        
+    def set_pyl_trainner(self, model):
+        self.model = TabModel(model, self.params)
+        self.init_wandb()
+        self.init_callback()
+        args = self.params
+        self.trainner = Trainer(
+            accelerator="auto",
+            devices=torch.cuda.device_count() if torch.cuda.is_available() else None,
+            max_epochs=args.epochs,
+            callbacks=[TQDMProgressBar(refresh_rate=20), self.checkpoint_callback, self.lr_callback],
+            logger=self.wandb_logger,
+            check_val_every_n_epoch=1,
+            strategy=DDPStrategy(static_graph=True),
+            precision=16 if args.fp16 else 32,
+        )
+        rank_zero_info(
+            f"{'-' * 100}\n"
+            f"{str(model.model)}\n"
+            f"{'-' * 100}\n"
+        )
+        self.ckpt_path = args.ckpt_path
+        
+        if args.resume_weight_only:
+            self.model = TabModel.load_from_checkpoint(
+                self.ckpt_path, model=model.model
+            )
+        
+    def init_wandb(self):
+        args = self.params
+        wandb_id = os.getenv("WANDB_RUN_ID") or wandb.util.generate_id()
+        self.wandb_logger = WandbLogger(
+            name=args.wandb_logger_name,
+            project=args.project_name,
+            entity=args.wandb_entity,
+            save_dir=os.path.join(args.storage_path, f'models'),
+            id=args.resume_id or wandb_id,
+        )
+        rank_zero_info(f"Logging to {self.wandb_logger.save_dir}/{self.wandb_logger.name}/{self.wandb_logger.version}")    
+    
+    def init_callback(self):
+        args = self.params
+        self.checkpoint_callback = ModelCheckpoint(
+            monitor='val/loss', mode='min',
+            save_top_k=3, save_last=True,
+            dirpath=os.path.join(self.wandb_logger.save_dir,
+                                args.wandb_logger_name,
+                                self.wandb_logger._id,
+                                'checkpoints'),
+        )
+        self.lr_callback = LearningRateMonitor(logging_interval='step')
+        
     def fit(self):
-        self.trainner.fit(self.get_X, self.get_Y)
-
+        if isinstance(self.trainner, Trainer):
+            self.model.load_train_dataset_from_df(self.get_processed_X, self.get_processed_Y)
+            self.model.load_test_dataset_from_df(self.get_test_X, self.get_test_Y)
+            self.trainner.fit()
+        else:
+            self.trainner.fit(self.get_X, self.get_Y)
+        
     @property
     def rfr_parameter_space(self):
         return {
@@ -297,6 +367,10 @@ class ML4MOC:
     def get_X(self):
         return get_X(self.get_processed_X)
 
+    @property
+    def get_features_dim(self):
+        return self.get_X.shape[1]
+    
     @property
     def get_Y(self):
         if self.label_type == "log_scaled":

@@ -14,9 +14,9 @@ from pytorch_lightning.utilities import rank_zero_info
 import os
 from ml4moc.DL.utils.lr_schedulers import get_schedule_fn
 
-class FeatModel(pl.LightningModule):
+class TabModel(pl.LightningModule):
     def __init__(self, model_class, param_args):
-        super(FeatModel, self).__init__()
+        super(TabModel, self).__init__()
         self.model_class = model_class
         self.args = param_args
 

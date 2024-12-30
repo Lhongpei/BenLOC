@@ -23,7 +23,10 @@ class Params:
         except KeyError:
             raise AttributeError(f"'Params' object has no attribute '{key}'")
         
-class DLParams(Params):
+    def return_dict(self):
+        return self.__dict__
+        
+class GraphParams(Params):
     def __init__(self, **kwargs):
         self.label_type: str = "log_scaled", 
         self.default: int = 0, 
@@ -33,7 +36,7 @@ class DLParams(Params):
         self.hyperparams: dict = None
         super().__init__(**kwargs)
         
-class MLParams(Params):
+class TabParams(Params):
     def __init__(self, **kwargs):
         self.shift_scale = 10
         self.label_type = 'log_scaled'
