@@ -15,7 +15,7 @@ from pytorch_lightning.callbacks.progress import TQDMProgressBar
 from pytorch_lightning.loggers import WandbLogger
 from pytorch_lightning.strategies.ddp import DDPStrategy
 from pytorch_lightning.utilities import rank_zero_info
-from ml4moc.DL.pytorch_tabnet import tab_model
+from ml4moc.DL.pytorch_tabnet.tab_model import TabModel
 
 from ml4moc.ML.utils import (
     setup_logger,
@@ -30,7 +30,7 @@ from ml4moc.ML.utils import (
 )
 from ml4moc.params import Params
 from ml4moc.logger import log_init
-from ml4moc.pyl_main import TabModel
+from ml4moc.pyl_main import TabModelPyL
 import wandb, os
 
 
@@ -72,15 +72,6 @@ class ML4MOC:
         # Check if the input is as expected
         self.label = label
 
-    def set_train_data(self, feat: pd.DataFrame, label: pd.DataFrame):
-        self.has_processed = False
-        self.feat, self.label = select_common_rows(feat, label)
-
-    def set_test_data(self, test_feat: pd.DataFrame, test_label: pd.DataFrame):
-        self.has_processed = False
-        self.test_feat, self.test_label = select_common_rows(test_feat, test_label)
-        self.train_test_split_flag = True
-
     def process(self):
         self.feat_processed, self.label_processed = self._preprocess(
             self.feat, self.label, mode="train"
@@ -116,6 +107,15 @@ class ML4MOC:
 
     # -----------------------------------------------------------------
     # About Splitting Data
+    def set_train_data(self, feat: pd.DataFrame, label: pd.DataFrame):
+        self.has_processed = False
+        self.feat, self.label = select_common_rows(feat, label)
+
+    def set_test_data(self, test_feat: pd.DataFrame, test_label: pd.DataFrame):
+        self.has_processed = False
+        self.test_feat, self.test_label = select_common_rows(test_feat, test_label)
+        self.train_test_split_flag = True
+        
     def set_train_test_data(self, train_feat_label, test_feat_label):
         self.set_train_data(train_feat_label[0], train_feat_label[1])
         self.set_test_data(test_feat_label[0], test_feat_label[1])
@@ -183,10 +183,10 @@ class ML4MOC:
         self.trainner = model
         if isinstance(model, torch.nn.Module):
             print("Using PyTorch Module, it will set a PyTorch_Lightning model")
-            self.trainner = TabModel(model, self.params)
+            self.trainner = TabModelPyL(model, self.params)
 
     def set_pyl_trainner(self, model):
-        self.model = TabModel(model, self.params)
+        self.model = TabModelPyL(model, self.params)
         self.init_wandb()
         self.init_callback()
         args = self.params
@@ -208,7 +208,7 @@ class ML4MOC:
         self.ckpt_path = args.ckpt_path
 
         if args.resume_weight_only:
-            self.model = TabModel.load_from_checkpoint(
+            self.model = TabModelPyL.load_from_checkpoint(
                 self.ckpt_path, model=model.model
             )
 
@@ -249,11 +249,13 @@ class ML4MOC:
             )
             #self.model.load_test_dataset_from_df(self.get_test_X, self.get_test_Y)
             self.trainner.fit()
-        else:
+        elif isinstance(self.trainner, TabModel):
             train_feat, valid_feat, train_label, valid_label = train_test_split(
                 self.get_X, self.get_Y, test_size=self.params.valid_train_ratio
             )
             self.trainner.fit(train_feat, train_label, eval_set=[(valid_feat, valid_label)])
+        else:
+            self.trainner.fit(self.get_X, self.get_Y)
 
     @property
     def rfr_parameter_space(self):
@@ -414,8 +416,8 @@ class ML4MOC:
         predict_test = self.trainner.predict(self.get_test_X)
         result_feat_label = self.label_processed
         result_test_feat_label = self.test_label_processed
-        result_feat_label["True_y"] = self.get_Y
-        result_test_feat_label["True_y"] = self.get_test_Y
+        # result_feat_label["True_y"] = self.get_Y
+        # result_test_feat_label["True_y"] = self.get_test_Y
         result_feat_label["predict_y"] = predict_train
         result_test_feat_label["predict_y"] = predict_test
         min_idx_train = result_feat_label.groupby("File Name")["predict_y"].idxmin()
