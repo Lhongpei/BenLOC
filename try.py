@@ -4,7 +4,7 @@ params = TabParams(default="MipLogLevel-2", label_type="log_scaled", shift_scale
 model = ML4MOC(params)
 model.load_dataset("indset",processed=True)
 model.set_trainner(TabNetRegressor())
-model.train_test_split_by_splitfile('./ml4moc/data/fold_name/indset_fold_1.pkl')
+model.train_test_split_by_splitfile('./ml4moc/data/fold_name/indset_fold_2.pkl')
 model.fit()
 evaluation_results=model.evaluate()
 print(evaluation_results)

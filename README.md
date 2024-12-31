@@ -338,3 +338,11 @@ params = {
 trainer = GNNTrainer(params)
 trainer.run()
 ```
+
+## Reference
+
+- https://github.com/dreamquark-ai/tabnet
+
+- https://github.com/lucidrains/hyper-connections/tree/main
+
+- https://github.com/Lightning-AI/pytorch-lightning
