@@ -15,6 +15,7 @@ from pytorch_lightning.callbacks.progress import TQDMProgressBar
 from pytorch_lightning.loggers import WandbLogger
 from pytorch_lightning.strategies.ddp import DDPStrategy
 from pytorch_lightning.utilities import rank_zero_info
+from ml4moc.DL.pytorch_tabnet import tab_model
 
 from ml4moc.ML.utils import (
     setup_logger,
@@ -31,9 +32,11 @@ from ml4moc.params import Params
 from ml4moc.logger import log_init
 from ml4moc.pyl_main import TabModel
 import wandb, os
+
+
 class ML4MOC:
     @log_init
-    def __init__(self, params = Params()):
+    def __init__(self, params=Params()):
         self.trainner = None
         self.imple_dataset = [
             "setcover",
@@ -53,7 +56,7 @@ class ML4MOC:
         self.train_test_split_flag = False
         self.best_col = None
         self.has_processed = False
-        
+
     def set_label_type(self, label_type: str):
         assert label_type in [
             "log_scaled",
@@ -105,28 +108,27 @@ class ML4MOC:
             self.test_default_time = default_time
             self.test_oracle = oracle
 
-        
         train_data = pd.merge(feat, label, on="File Name", how="inner")
-        train_data['timelabel_default'] = train_data[self.default]
+        train_data["timelabel_default"] = train_data[self.default]
         train_data = preprocess_data(train_data)
         feat, label = process(train_data)
         return feat, label
 
-    #-----------------------------------------------------------------
+    # -----------------------------------------------------------------
     # About Splitting Data
     def set_train_test_data(self, train_feat_label, test_feat_label):
         self.set_train_data(train_feat_label[0], train_feat_label[1])
         self.set_test_data(test_feat_label[0], test_feat_label[1])
         self.train_test_split_flag = True
-    
+
     def train_test_split(self, test_size=0.2):
         feat_train, feat_test, label_train, label_test = train_test_split(
             self.feat, self.label, test_size=test_size, random_state=42, shuffle=True
         )
         self.set_train_test_data((feat_train, label_train), (feat_test, label_test))
-        
-    #TODO: Test this method
-    def train_test_split_by_name(self, train_name:list, test_name:list):
+
+    # TODO: Test this method
+    def train_test_split_by_name(self, train_name: list, test_name: list):
         feat_with_name_index = self.feat.set_index("File Name")
         label_with_name_index = self.label.set_index("File Name")
         feat_train = feat_with_name_index.loc[train_name].reset_index()
@@ -134,16 +136,17 @@ class ML4MOC:
         label_train = label_with_name_index.loc[train_name].reset_index()
         label_test = label_with_name_index.loc[test_name].reset_index()
         self.set_train_test_data((feat_train, label_train), (feat_test, label_test))
-    #TODO: Test this method 
+
+    # TODO: Test this method
     def train_test_split_by_splitfile(self, split_file: str):
         with open(split_file, "rb") as f:
             pickle_list = pickle.load(f)
-        train_list = pickle_list['train']
-        test_list = pickle_list['test']
+        train_list = pickle_list["train"]
+        test_list = pickle_list["test"]
         self.train_test_split_by_name(train_list, test_list)
-        
-            
-    #-----------------------------------------------------------------
+
+    # -----------------------------------------------------------------
+    
     def load_features(self, dataset: str, processed: bool = False):
         assert (
             dataset in self.imple_dataset
@@ -181,7 +184,7 @@ class ML4MOC:
         if isinstance(model, torch.nn.Module):
             print("Using PyTorch Module, it will set a PyTorch_Lightning model")
             self.trainner = TabModel(model, self.params)
-        
+
     def set_pyl_trainner(self, model):
         self.model = TabModel(model, self.params)
         self.init_wandb()
@@ -191,24 +194,24 @@ class ML4MOC:
             accelerator="auto",
             devices=torch.cuda.device_count() if torch.cuda.is_available() else None,
             max_epochs=args.epochs,
-            callbacks=[TQDMProgressBar(refresh_rate=20), self.checkpoint_callback, self.lr_callback],
+            callbacks=[
+                TQDMProgressBar(refresh_rate=20),
+                self.checkpoint_callback,
+                self.lr_callback,
+            ],
             logger=self.wandb_logger,
             check_val_every_n_epoch=1,
             strategy=DDPStrategy(static_graph=True),
             precision=16 if args.fp16 else 32,
         )
-        rank_zero_info(
-            f"{'-' * 100}\n"
-            f"{str(model.model)}\n"
-            f"{'-' * 100}\n"
-        )
+        rank_zero_info(f"{'-' * 100}\n" f"{str(model.model)}\n" f"{'-' * 100}\n")
         self.ckpt_path = args.ckpt_path
-        
+
         if args.resume_weight_only:
             self.model = TabModel.load_from_checkpoint(
                 self.ckpt_path, model=model.model
             )
-        
+
     def init_wandb(self):
         args = self.params
         wandb_id = os.getenv("WANDB_RUN_ID") or wandb.util.generate_id()
@@ -216,31 +219,42 @@ class ML4MOC:
             name=args.wandb_logger_name,
             project=args.project_name,
             entity=args.wandb_entity,
-            save_dir=os.path.join(args.storage_path, f'models'),
+            save_dir=os.path.join(args.storage_path, f"models"),
             id=args.resume_id or wandb_id,
         )
-        rank_zero_info(f"Logging to {self.wandb_logger.save_dir}/{self.wandb_logger.name}/{self.wandb_logger.version}")    
-    
+        rank_zero_info(
+            f"Logging to {self.wandb_logger.save_dir}/{self.wandb_logger.name}/{self.wandb_logger.version}"
+        )
+
     def init_callback(self):
         args = self.params
         self.checkpoint_callback = ModelCheckpoint(
-            monitor='val/loss', mode='min',
-            save_top_k=3, save_last=True,
-            dirpath=os.path.join(self.wandb_logger.save_dir,
-                                args.wandb_logger_name,
-                                self.wandb_logger._id,
-                                'checkpoints'),
+            monitor="val/loss",
+            mode="min",
+            save_top_k=3,
+            save_last=True,
+            dirpath=os.path.join(
+                self.wandb_logger.save_dir,
+                args.wandb_logger_name,
+                self.wandb_logger._id,
+                "checkpoints",
+            ),
         )
-        self.lr_callback = LearningRateMonitor(logging_interval='step')
-        
+        self.lr_callback = LearningRateMonitor(logging_interval="step")
+
     def fit(self):
         if isinstance(self.trainner, Trainer):
-            self.model.load_train_dataset_from_df(self.get_processed_X, self.get_processed_Y)
-            self.model.load_test_dataset_from_df(self.get_test_X, self.get_test_Y)
+            self.model.load_train_dataset_from_df(
+                self.get_processed_X, self.get_processed_Y
+            )
+            #self.model.load_test_dataset_from_df(self.get_test_X, self.get_test_Y)
             self.trainner.fit()
         else:
-            self.trainner.fit(self.get_X, self.get_Y)
-        
+            train_feat, valid_feat, train_label, valid_label = train_test_split(
+                self.get_X, self.get_Y, test_size=self.params.valid_train_ratio
+            )
+            self.trainner.fit(train_feat, train_label, eval_set=[(valid_feat, valid_label)])
+
     @property
     def rfr_parameter_space(self):
         return {
@@ -318,7 +332,7 @@ class ML4MOC:
 
     def shifted_geometric_mean(self, data):
         return shifted_geometric_mean(data, self.shift_scale)
-    
+
     def baseline(self, df: pd.DataFrame, default, col=None):
         if col == None:
             data_backup = df.copy()
@@ -370,13 +384,13 @@ class ML4MOC:
     @property
     def get_features_dim(self):
         return self.get_X.shape[1]
-    
+
     @property
     def get_Y(self):
         if self.label_type == "log_scaled":
-            return get_log_scale_y(self.get_processed_Y)
+            return get_log_scale_y(self.get_processed_Y).reshape(-1,1)
         else:
-            return get_origin_y(self.get_processed_Y)
+            return get_origin_y(self.get_processed_Y).reshape(-1,1)
 
     @property
     def get_test_X(self):
@@ -400,6 +414,8 @@ class ML4MOC:
         predict_test = self.trainner.predict(self.get_test_X)
         result_feat_label = self.label_processed
         result_test_feat_label = self.test_label_processed
+        result_feat_label["True_y"] = self.get_Y
+        result_test_feat_label["True_y"] = self.get_test_Y
         result_feat_label["predict_y"] = predict_train
         result_test_feat_label["predict_y"] = predict_test
         min_idx_train = result_feat_label.groupby("File Name")["predict_y"].idxmin()

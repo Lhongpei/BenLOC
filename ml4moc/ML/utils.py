@@ -103,9 +103,8 @@ def get_X(feature):
     X = replace_inf_with_max(X)
     return X
 
-
 def get_log_scale_y(data):
-    y = np.log2((data["default"] + 1) / (data["time"] + 1))
+    y = np.log2((data["time"] + 1) / (data["default"] + 1))
     y = np.array(y)
     return y
 
