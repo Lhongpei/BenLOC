@@ -104,7 +104,7 @@ def get_X(feature):
     return X
 
 def get_log_scale_y(data):
-    y = np.log2((data["time"] + 1) / (data["default"] + 1))
+    y = np.log2((data["time"] + 1) )
     y = np.array(y)
     return y
 

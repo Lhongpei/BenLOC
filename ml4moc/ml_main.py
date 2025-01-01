@@ -16,6 +16,7 @@ from pytorch_lightning.loggers import WandbLogger
 from pytorch_lightning.strategies.ddp import DDPStrategy
 from pytorch_lightning.utilities import rank_zero_info
 from ml4moc.DL.pytorch_tabnet.tab_model import TabModel
+import copy
 
 from ml4moc.ML.utils import (
     setup_logger,
@@ -242,20 +243,20 @@ class ML4MOC:
         )
         self.lr_callback = LearningRateMonitor(logging_interval="step")
 
-    def fit(self):
+    def fit(self, **kwargs):
         if isinstance(self.trainner, Trainer):
             self.model.load_train_dataset_from_df(
                 self.get_processed_X, self.get_processed_Y
             )
             #self.model.load_test_dataset_from_df(self.get_test_X, self.get_test_Y)
-            self.trainner.fit()
+            self.trainner.fit(**kwargs)
         elif isinstance(self.trainner, TabModel):
             train_feat, valid_feat, train_label, valid_label = train_test_split(
                 self.get_X, self.get_Y, test_size=self.params.valid_train_ratio
             )
-            self.trainner.fit(train_feat, train_label, eval_set=[(valid_feat, valid_label)])
+            self.trainner.fit(train_feat, train_label, eval_set=[(valid_feat, valid_label)], **kwargs)
         else:
-            self.trainner.fit(self.get_X, self.get_Y)
+            self.trainner.fit(self.get_X, self.get_Y, **kwargs)
 
     @property
     def rfr_parameter_space(self):
@@ -336,9 +337,8 @@ class ML4MOC:
         return shifted_geometric_mean(data, self.shift_scale)
 
     def baseline(self, df: pd.DataFrame, default, col=None):
-        if col == None:
-            data_backup = df.copy()
-        data = df
+        data_backup = copy.deepcopy(df)
+        data = data_backup
 
         default_time = self.shifted_geometric_mean(data[default])
         column = [
