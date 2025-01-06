@@ -50,7 +50,8 @@ class TabParams(Params):
     def _init_pyl_params(self):
         # Training parameters
         self.batch_size = 64
-        self.num_epochs = 50
+        self.max_epochs = 50
+        self.patience = 20
         self.learning_rate = 2e-4
         self.weight_decay = 1e-4
         self.lr_scheduler = 'cosine-decay'

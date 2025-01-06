@@ -10,7 +10,7 @@ import logging
 import sklearn.model_selection
 import torch
 from pytorch_lightning import Trainer
-from pytorch_lightning.callbacks import LearningRateMonitor, ModelCheckpoint
+from pytorch_lightning.callbacks import LearningRateMonitor, ModelCheckpoint, EarlyStopping
 from pytorch_lightning.callbacks.progress import TQDMProgressBar
 from pytorch_lightning.loggers import WandbLogger
 from pytorch_lightning.strategies.ddp import DDPStrategy
@@ -184,72 +184,83 @@ class ML4MOC:
         self.trainner = model
         if isinstance(model, torch.nn.Module):
             print("Using PyTorch Module, it will set a PyTorch_Lightning model")
-            self.trainner = TabModelPyL(model, self.params)
+            self.set_pyl_trainner(model)
 
+    def set_call_back(self):
+        self.early_stop_callback = EarlyStopping(
+            monitor="val_loss", patience=int(self.params.patience), verbose=True, mode="min")
+        self.checkpoint_callback = ModelCheckpoint(
+            monitor="val_loss",  
+            save_top_k=1,        
+            mode="min"           
+        )
+    
     def set_pyl_trainner(self, model):
         self.model = TabModelPyL(model, self.params)
-        self.init_wandb()
-        self.init_callback()
+        # self.init_wandb()
+        # self.init_callback()
+        self.set_call_back()
         args = self.params
         self.trainner = Trainer(
             accelerator="auto",
-            devices=torch.cuda.device_count() if torch.cuda.is_available() else None,
-            max_epochs=args.epochs,
-            callbacks=[
-                TQDMProgressBar(refresh_rate=20),
-                self.checkpoint_callback,
-                self.lr_callback,
-            ],
-            logger=self.wandb_logger,
+            devices=1,#torch.cuda.device_count() if torch.cuda.is_available() else None,
+            max_epochs=args.max_epochs,
+            callbacks= [self.early_stop_callback, self.checkpoint_callback],
+            # [
+            #     TQDMProgressBar(refresh_rate=20),
+            #     self.checkpoint_callback,
+            #     self.lr_callback,
+            # ],
+            logger=False,
             check_val_every_n_epoch=1,
             strategy=DDPStrategy(static_graph=True),
             precision=16 if args.fp16 else 32,
         )
-        rank_zero_info(f"{'-' * 100}\n" f"{str(model.model)}\n" f"{'-' * 100}\n")
-        self.ckpt_path = args.ckpt_path
+        rank_zero_info(f"{'-' * 100}\n" f"{str(self.model)}\n" f"{'-' * 100}\n")
+        # self.ckpt_path = args.ckpt_path
 
-        if args.resume_weight_only:
-            self.model = TabModelPyL.load_from_checkpoint(
-                self.ckpt_path, model=model.model
-            )
+        # if args.resume_weight_only:
+        #     self.model = TabModelPyL.load_from_checkpoint(
+        #         self.ckpt_path, model=model.model
+        #     )
 
-    def init_wandb(self):
-        args = self.params
-        wandb_id = os.getenv("WANDB_RUN_ID") or wandb.util.generate_id()
-        self.wandb_logger = WandbLogger(
-            name=args.wandb_logger_name,
-            project=args.project_name,
-            entity=args.wandb_entity,
-            save_dir=os.path.join(args.storage_path, f"models"),
-            id=args.resume_id or wandb_id,
-        )
-        rank_zero_info(
-            f"Logging to {self.wandb_logger.save_dir}/{self.wandb_logger.name}/{self.wandb_logger.version}"
-        )
+    # def init_wandb(self):
+    #     args = self.params
+    #     wandb_id = os.getenv("WANDB_RUN_ID") or wandb.util.generate_id()
+    #     self.wandb_logger = WandbLogger(
+    #         name=args.wandb_logger_name,
+    #         project=args.project_name,
+    #         entity=args.wandb_entity,
+    #         save_dir=os.path.join(args.storage_path, f"models"),
+    #         id=args.resume_id or wandb_id,
+    #     )
+    #     rank_zero_info(
+    #         f"Logging to {self.wandb_logger.save_dir}/{self.wandb_logger.name}/{self.wandb_logger.version}"
+    #     )
 
-    def init_callback(self):
-        args = self.params
-        self.checkpoint_callback = ModelCheckpoint(
-            monitor="val/loss",
-            mode="min",
-            save_top_k=3,
-            save_last=True,
-            dirpath=os.path.join(
-                self.wandb_logger.save_dir,
-                args.wandb_logger_name,
-                self.wandb_logger._id,
-                "checkpoints",
-            ),
-        )
-        self.lr_callback = LearningRateMonitor(logging_interval="step")
+    # def init_callback(self):
+    #     args = self.params
+    #     self.checkpoint_callback = ModelCheckpoint(
+    #         monitor="val/loss",
+    #         mode="min",
+    #         save_top_k=3,
+    #         save_last=True,
+    #         dirpath=os.path.join(
+    #             self.wandb_logger.save_dir,
+    #             args.wandb_logger_name,
+    #             self.wandb_logger._id,
+    #             "checkpoints",
+    #         ),
+    #     )
+    #     self.lr_callback = LearningRateMonitor(logging_interval="step")
 
     def fit(self, **kwargs):
+        if self.trainner is None:
+            raise ValueError("Please set the trainner first.")
         if isinstance(self.trainner, Trainer):
-            self.model.load_train_dataset_from_df(
-                self.get_processed_X, self.get_processed_Y
-            )
+            self.model.load_train_dataset(self.get_X, self.get_Y, self.params.valid_train_ratio)
             #self.model.load_test_dataset_from_df(self.get_test_X, self.get_test_Y)
-            self.trainner.fit(**kwargs)
+            self.trainner.fit(self.model)
         elif isinstance(self.trainner, TabModel):
             train_feat, valid_feat, train_label, valid_label = train_test_split(
                 self.get_X, self.get_Y, test_size=self.params.valid_train_ratio
