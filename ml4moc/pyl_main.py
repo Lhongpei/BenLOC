@@ -3,7 +3,6 @@ import pandas as pd
 from torch.utils.data import TensorDataset, random_split, DataLoader
 import torch
 
-"""A meta PyTorch Lightning model for training and evaluating DIFUSCO models."""
 import copy
 import numpy as np
 import pytorch_lightning as pl
