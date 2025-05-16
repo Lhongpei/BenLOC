@@ -3,22 +3,23 @@
 
 <img src="pic/workflow.png" alt="WorkFlow" width="800">
 
-The `ML4MOC` class is designed to facilitate the training and evaluation of machine learning models for optimization problems. It provides methods for data preprocessing, model selection, training, and evaluation. Below is a step-by-step guide on how to use the class:
+The `BenLOC` class is designed to facilitate the training and evaluation of machine learning models for optimization problems. It provides methods for data preprocessing, model selection, training, and evaluation. Below is a step-by-step guide on how to use the class:
 
 ## Datasets
 
-See `ml4moc/data/dataset.md` for the introduction.
+See `BenLOC/data/dataset.md` for the introduction.
 
-## ML4MOC: Machine Learning API
+## BenLOC: Machine Learning API
 
 ### 1. **Setting Parameters**
 
-The parameters for the `ML4MOC` class can be set during initialization. You can either pass a `Params` object or use the default parameters.
+The parameters for the `BenLOC` class can be set during initialization. You can either pass a `Params` object or use the default parameters.
 
 ```python
-from ml4moc import TabParams
+from BenLOC import TabParams
+
 params = TabParams(default="MipLogLevel-2", label_type="log_scaled", shift_scale=10)
-model = ML4MOC(params)
+model = BenLOC(params)
 ```
 
 - **label_type**: Specifies whether the labels are scaled (`log_scaled`) or in their original form (`original`).
@@ -29,7 +30,7 @@ model = ML4MOC(params)
 
 ### 2. **Setting the Learner (Model)**
 
-You can set a model (e.g., `RandomForestRegressor`) as the trainer for the `ML4MOC` class using the `set_trainner` method.
+You can set a model (e.g., `RandomForestRegressor`) as the trainer for the `BenLOC` class using the `set_trainner` method.
 
 ```python
 from sklearn.ensemble import RandomForestRegressor
@@ -153,12 +154,14 @@ model.gbdt_parameter_space
 
 ```python
 # Step 1: Initialize the model with parameters
-from ml4moc.params import Params
+from BenLOC.params import Params
+
 params = Params(default="MipLogLevel-2", label_type="log_scaled", shift_scale=10)
-model = ML4MOC(params)
+model = BenLOC(params)
 
 # Step 2: Set the machine learning model (e.g., Random Forest)
 from sklearn.ensemble import RandomForestRegressor
+
 model.set_trainner(RandomForestRegressor(verbose=1))
 
 # Step 3: Load the dataset and preprocess
@@ -177,7 +180,7 @@ evaluation_results = model.evaluate()
 print(evaluation_results)
 ```
 
-## ML4MOC: Deep Learning Methods
+## BenLOC: Deep Learning Methods
 
 ### **1. Set Up the Environment**
 

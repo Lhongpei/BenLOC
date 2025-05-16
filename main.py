@@ -1,8 +1,8 @@
 import argparse
-from ml4moc import ML4MOC, TabParams, TabNetRegressor
+from BenLOC import BenLOC, TabParams, TabNetRegressor
 from sklearn.ensemble import RandomForestRegressor
-from ml4moc.DL.gnn_pairwise.train_gnn_predictor import gnn_pairwise
-from ml4moc.DL.gnn_predictor.trainPyG.predictTrain import gnn_predictor
+from BenLOC.DL.gnn_pairwise.train_gnn_predictor import gnn_pairwise
+from BenLOC.DL.gnn_predictor.trainPyG.predictTrain import gnn_predictor
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Main Program to run BenLOC")
@@ -22,10 +22,10 @@ if __name__ == "__main__":
     if args.mode == "tab_ml":
         # Tabular ML
         params = TabParams(default="MipLogLevel-2", label_type="log_scaled", shift_scale=10)
-        model = ML4MOC(params)
+        model = BenLOC(params)
         model.load_dataset("indset", processed=True)
         model.set_trainner(RandomForestRegressor())
-        model.train_test_split_by_splitfile('./ml4moc/data/fold_name/indset_fold_2.pkl')
+        model.train_test_split_by_splitfile('./BenLOC/data/fold_name/indset_fold_2.pkl')
         model.fit()
         evaluation_results = model.evaluate()
         print(evaluation_results)
@@ -33,12 +33,12 @@ if __name__ == "__main__":
     elif args.mode == "tab_dl":
         # Tabular DL
         params = TabParams(default="MipLogLevel-2", label_type="log_scaled", shift_scale=10)
-        model = ML4MOC(params)
+        model = BenLOC(params)
         model.load_dataset("indset", processed=True)
         tabmodel = TabNetRegressor(n_d=5, n_a=5)
         tabmodel.fit(model.get_X, model.get_Y, max_epochs=1)
         model.set_trainner(tabmodel.network)
-        model.train_test_split_by_splitfile('./ml4moc/data/fold_name/indset_fold_2.pkl')
+        model.train_test_split_by_splitfile('./BenLOC/data/fold_name/indset_fold_2.pkl')
         model.fit()
         evaluation_results = model.evaluate()
         print(evaluation_results)
