@@ -4,14 +4,14 @@ import pandas as pd
 from torch.optim.lr_scheduler import StepLR
 from torch.utils.data import random_split
 from torch_geometric.loader import DataLoader
-from DL.dataset_gen.heteroDataset import HeteroDataset
-from DL.models.gnn import BiparGAT
-from DL.train.trainer import train_loop, predict_loop
-from DL.utils.loss import soft_l1_regr_loss
+from ml4moc.DL.gnn_pairwise.dataset_gen.heteroDataset import HeteroDataset
+from ml4moc.DL.gnn_pairwise.models.gnn import BiparGAT
+from ml4moc.extract_feature.vae_extractor.trainer import train_loop, predict_loop
+from ml4moc.DL.gnn_pairwise.utils.loss import soft_l1_regr_loss
 from tqdm import tqdm
 import wandb
-from DL.config.setConfig import create_config
-from DL.utils.utils import setup_seed
+from ml4moc.DL.gnn_pairwise.config.setConfig import create_config
+from ml4moc.DL.gnn_pairwise.utils.utils import setup_seed
 
 
 class GNNTrainer:

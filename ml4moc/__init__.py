@@ -5,6 +5,6 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), 'DL')))
 from .ml_main import *
 from .ML.utils import *
 from .params import *
-from .DL.pytorch_tabnet.tab_model import *
-from .DL.pytorch_tabnet.tab_network import *
-from .DL.tab_transformer_pytorch import *
+from ml4moc.DL.tab_net.pytorch_tabnet import *
+from ml4moc.DL.tab_net.pytorch_tabnet.tab_model import *
+from ml4moc.DL.tab_net.tab_transformer_pytorch import *

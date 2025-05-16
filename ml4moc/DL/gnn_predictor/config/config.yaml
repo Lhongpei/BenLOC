@@ -1,0 +1,102 @@
+fold: 5
+hyper_L2R:
+  alpha: 5
+  lr: 0.001
+  epoch: 500
+  test_epoch: 1
+  batchsize: 32
+  stepsize: 150
+  gamma: 0.1
+  pooling: add
+  tot_config_dim: 25
+  ranklist:
+    config_dim: 25
+  regression:
+    config_dim: 10
+encoder:
+  input_dim_xs: 5
+  input_dim_xt: 8
+  input_dim_edge: 1
+  num_layers: 1
+  hidden_dim: 80
+  mlp_hidden_dim: 90
+  enc_dim: 40
+predict_L2R:
+  hidden_dim: 80
+  mlp_hidden_dim:
+  - 200
+  - 100
+  - 50
+  num_layers: 3
+pyg_regression:
+  gnn_hidden_dim: 50
+  gnn_out_dim: 30
+  pred_mlp_hidden_dim:
+  - 400
+  - 200
+  - 100
+  - 50
+  - 25
+  config_mlp_hidden_dim:
+  - 400
+  - 200
+  - 100
+  - 50
+  config_mlp_layers: 1
+  pred_mlp_layers: null
+  num_layers: 3
+  task_dim: 10
+  pooling: add
+  jk_mode: lstm
+  GNN: GraphSAGE
+pyg_ranklist:
+  gnn_hidden_dim: 300
+  gnn_out_dim: 100
+  pooling_mlp_hidden_dim:
+  - 200
+  - 300
+  - 100
+  pooling_mlp_layers: 1
+  pooling_mlp_out_dim: 100
+  mlp_hidden_dim:
+  - 100
+  - 200
+  - 50
+  pred_mlp_layers: null
+  num_layers: 3
+  task_dim: 25
+  pooling: add
+  jk_mode: cat
+  GNN: GAT
+pyg_ranklist_node:
+  gnn_hidden_dim: 300
+  gnn_out_dim: 1
+  num_layers: 3
+  task_dim: 25
+  jk_mode: cat
+  GNN: GraphSAGE
+seed: 32
+cpu_threads: 64
+paths:
+  setcover:
+    data_folder: /home/lihongpei/l2t/repo/setcover-flat
+    store_folder: /home/lihongpei/l2t/repo/datasets/setcover
+  indset:
+    data_folder: /home/lihongpei/l2t/repo/indset-flat
+    store_folder: /home/lihongpei/l2t/repo/datasets/indset
+  mix_set_ind:
+    data_folder: /data/ml_tuner/mix_set_ind
+    store_folder: /home/lihongpei/l2t/repo/datasets/mix_set_ind
+  miplib:
+    data_folder: /data/MIPLIB-2017-Collection-COPT71RC-MipPres
+    store_folder: /home/lihongpei/l2t/repo/datasets/miplib
+  predict_config_folder: /home/lihongpei/l2t/repo/setcover_config
+  savedEncoder: /home/lihongpei/l2t/repo/setcover_train/encoder100.pth
+  setcover_folder: /home/lihongpei/l2t/repo/setcover-flat
+  setcover_report_root: /home/lihongpei/l2t/repo/labels/balanced_setcover
+  indset_folder: /home/lihongpei/l2t/repo/indset-flat
+  indset_report_root: /home/lihongpei/l2t/repo/labels/indset_fixed_5fold
+  train_folder: /home/lihongpei/l2t/repo/fold_rank_train
+  result_folder: /home/lihongpei/l2t/repo/fold_rank_result
+  mix_set_int_folder: /home/lihongpei/l2t/repo/mix_set_ind
+  mixed_report_root: /home/lihongpei/l2t/repo/labels/balanced_setcover

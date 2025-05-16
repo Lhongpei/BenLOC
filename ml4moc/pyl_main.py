@@ -11,7 +11,7 @@ import torch.nn.functional as F
 import torch.utils.data
 from pytorch_lightning.utilities import rank_zero_info
 import os
-from ml4moc.DL.utils.lr_schedulers import get_schedule_fn
+from ml4moc.DL.gnn_pairwise.utils.lr_schedulers import get_schedule_fn
 
 class TabModelPyL(pl.LightningModule):
     def __init__(self, model, param_args):

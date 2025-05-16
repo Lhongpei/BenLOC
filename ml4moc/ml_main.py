@@ -3,10 +3,8 @@ import sklearn
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.model_selection import GridSearchCV, train_test_split
 from sklearn.metrics import mean_squared_error
-import numpy as np
 import pandas as pd
 import pickle
-import logging
 import sklearn.model_selection
 import torch
 from pytorch_lightning import Trainer
@@ -15,7 +13,7 @@ from pytorch_lightning.callbacks.progress import TQDMProgressBar
 from pytorch_lightning.loggers import WandbLogger
 from pytorch_lightning.strategies.ddp import DDPStrategy
 from pytorch_lightning.utilities import rank_zero_info
-from ml4moc.DL.pytorch_tabnet.tab_model import TabModel
+from ml4moc.DL.tab_net.pytorch_tabnet.tab_model import TabModel
 import copy
 
 from ml4moc.ML.utils import (
@@ -32,7 +30,7 @@ from ml4moc.ML.utils import (
 from ml4moc.params import Params
 from ml4moc.logger import log_init
 from ml4moc.pyl_main import TabModelPyL
-import wandb, os
+import wandb
 
 
 class ML4MOC:
