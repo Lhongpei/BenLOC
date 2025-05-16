@@ -1,7 +1,7 @@
 # BenLOC: A Benchmark of Learning to MIP Optimizer Configuration.
 ![image](https://github.com/user-attachments/assets/a99fe4ae-5375-48c6-a17f-f6863b7b8df6)
 
-<img src="pic/workflow.png" alt="WorkFlow" width="800">
+
 
 The `ML4MOC` class is designed to facilitate the training and evaluation of machine learning models for optimization problems. It provides methods for data preprocessing, model selection, training, and evaluation. Below is a step-by-step guide on how to use the class:
 
@@ -9,7 +9,11 @@ The `ML4MOC` class is designed to facilitate the training and evaluation of mach
 
 See `ml4moc/data/dataset.md` for the introduction.
 
-## ML4MOC: Machine Learning API
+## WorkFlow: 
+<img src="pic/workflow.png" alt="WorkFlow" width="800">
+
+
+## BenLOC: Machine Learning API
 
 ### 1. **Setting Parameters**
 
@@ -177,7 +181,7 @@ evaluation_results = model.evaluate()
 print(evaluation_results)
 ```
 
-## ML4MOC: Deep Learning Methods
+## BenLOC: Deep Learning Methods
 
 ### **1. Set Up the Environment**
 
@@ -338,7 +342,6 @@ params = {
 trainer = GNNTrainer(params)
 trainer.run()
 ```
-
 ## Reference
 
 - https://github.com/dreamquark-ai/tabnet
