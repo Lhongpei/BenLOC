@@ -1,13 +1,17 @@
 # BenLOC: A Benchmark of Learning to MIP Optimizer Configuration.
 ![image](https://github.com/user-attachments/assets/a99fe4ae-5375-48c6-a17f-f6863b7b8df6)
 
-<img src="pic/workflow.png" alt="WorkFlow" width="800">
+
 
 The `BenLOC` class is designed to facilitate the training and evaluation of machine learning models for optimization problems. It provides methods for data preprocessing, model selection, training, and evaluation. Below is a step-by-step guide on how to use the class:
 
 ## Datasets
 
 See `BenLOC/data/dataset.md` for the introduction.
+
+## WorkFlow: 
+<img src="pic/workflow.png" alt="WorkFlow" width="800">
+
 
 ## BenLOC: Machine Learning API
 
@@ -17,7 +21,6 @@ The parameters for the `BenLOC` class can be set during initialization. You can 
 
 ```python
 from BenLOC import TabParams
-
 params = TabParams(default="MipLogLevel-2", label_type="log_scaled", shift_scale=10)
 model = BenLOC(params)
 ```
@@ -155,13 +158,11 @@ model.gbdt_parameter_space
 ```python
 # Step 1: Initialize the model with parameters
 from BenLOC.params import Params
-
 params = Params(default="MipLogLevel-2", label_type="log_scaled", shift_scale=10)
 model = BenLOC(params)
 
 # Step 2: Set the machine learning model (e.g., Random Forest)
 from sklearn.ensemble import RandomForestRegressor
-
 model.set_trainner(RandomForestRegressor(verbose=1))
 
 # Step 3: Load the dataset and preprocess
@@ -341,7 +342,6 @@ params = {
 trainer = GNNTrainer(params)
 trainer.run()
 ```
-
 ## Reference
 
 - https://github.com/dreamquark-ai/tabnet
