@@ -67,7 +67,7 @@ if __name__ == "__main__":
         ]
     )
 
-    default = "MipLogLevel-2"
+    default = "default"
     index = dataset
     ind_range = range(1, args.fold + 1)
 

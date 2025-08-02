@@ -1,4 +1,4 @@
-File Name,MipLogLevel-2,SubMipHeurLevel-1,StrongBranching-0,StrongBranching-1
+File Name,default,SubMipHeurLevel-1,StrongBranching-0,StrongBranching-1
 load_balancing_0,2900.16,3313.12,2639.75,3225.27
 load_balancing_1,1941.98,1966.42,1710.12,2240.45
 load_balancing_10,639.73,484.56,632.94,605.69

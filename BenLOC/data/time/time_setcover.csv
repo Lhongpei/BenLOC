@@ -1,4 +1,4 @@
-File Name,MipLogLevel-2,TreeCutLevel-1,RootCutLevel-0,TreeCutLevel-0,StrongBranching-0,RoundingHeurLevel-0,SubMipHeurLevel-0,DivingHeurLevel-1,RootCutLevel-1,SubMipHeurLevel-1,RoundingHeurLevel-1,StrongBranching-1,DivingHeurLevel-0
+File Name,default,TreeCutLevel-1,RootCutLevel-0,TreeCutLevel-0,StrongBranching-0,RoundingHeurLevel-0,SubMipHeurLevel-0,DivingHeurLevel-1,RootCutLevel-1,SubMipHeurLevel-1,RoundingHeurLevel-1,StrongBranching-1,DivingHeurLevel-0
 test_1600r_1600c_0.01d_instance_148,148.86,122.76,120.69,117.45,161.4,138.49,124.0,148.46,148.24,152.47,150.61,142.79,152.32
 test_1600r_1600c_0.01d_instance_284,112.45,99.22,99.76,100.6,168.51,111.87,90.19,110.27,118.45,107.2,113.62,106.8,112.74
 test_1600r_1600c_0.01d_instance_314,180.0,180.0,180.0,180.0,180.0,180.0,180.0,180.0,180.0,180.0,180.0,180.0,180.0

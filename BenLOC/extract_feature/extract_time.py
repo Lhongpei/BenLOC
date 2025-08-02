@@ -80,8 +80,8 @@ def extract_time(path,name):
         else:
             combined_df = pd.merge(combined_df, df, on='File Name', how='inner')
 
-    mip_log_level_column = combined_df.pop('MipLogLevel-2')
-    combined_df.insert(1, 'MipLogLevel-2', mip_log_level_column)
+    mip_log_level_column = combined_df.pop('default')
+    combined_df.insert(1, 'default', mip_log_level_column)
 
     name_conditions = {
         'nn_verification': (359.999, 6),

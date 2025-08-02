@@ -1,4 +1,4 @@
-File Name,MipLogLevel-2,RoundingHeurLevel-0,RootCutLevel-1,StrongBranching-1,StrongBranching-0,RoundingHeurLevel-1,RootCutLevel-0,TreeCutLevel-0,DivingHeurLevel-1,TreeCutLevel-1,SubMipHeurLevel-1,SubMipHeurLevel-0,DivingHeurLevel-0
+File Name,default,RoundingHeurLevel-0,RootCutLevel-1,StrongBranching-1,StrongBranching-0,RoundingHeurLevel-1,RootCutLevel-0,TreeCutLevel-0,DivingHeurLevel-1,TreeCutLevel-1,SubMipHeurLevel-1,SubMipHeurLevel-0,DivingHeurLevel-0
 load_balancing_0,2900.16,3417.83,3600.03,3225.27,2639.75,3463.27,3600.03,3600.03,3169.33,3600.03,3313.12,2678.95,3098.32
 load_balancing_1,1941.98,1928.11,2446.5,2240.45,1710.12,1843.92,3600.02,3600.03,1894.83,3600.05,1966.42,1839.04,2000.01
 load_balancing_10,639.73,802.98,576.55,605.69,632.94,657.54,3600.04,648.35,664.55,931.01,484.56,577.88,665.37

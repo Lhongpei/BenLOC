@@ -21,7 +21,7 @@ if __name__ == "__main__":
 
     if args.mode == "tab_ml":
         # Tabular ML
-        params = TabParams(default="MipLogLevel-2", label_type="log_scaled", shift_scale=10)
+        params = TabParams(default="default", label_type="log_scaled", shift_scale=10)
         model = BenLOC(params)
         model.load_dataset("indset", processed=True)
         model.set_trainner(RandomForestRegressor())
@@ -32,7 +32,7 @@ if __name__ == "__main__":
 
     elif args.mode == "tab_dl":
         # Tabular DL
-        params = TabParams(default="MipLogLevel-2", label_type="log_scaled", shift_scale=10)
+        params = TabParams(default="default", label_type="log_scaled", shift_scale=10)
         model = BenLOC(params)
         model.load_dataset("indset", processed=True)
         tabmodel = TabNetRegressor(n_d=5, n_a=5)

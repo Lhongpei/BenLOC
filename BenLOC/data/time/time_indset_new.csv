@@ -1,4 +1,4 @@
-File Name,MipLogLevel-2,TreeCutLevel-1,RootCutLevel-1,StrongBranching-1
+File Name,default,TreeCutLevel-1,RootCutLevel-1,StrongBranching-1
 test_1200_2_instance_197,0.0,0.0,0.0,0.0
 test_1200_2_instance_21,0.01,0.01,0.01,0.01
 test_1200_4_instance_132,30.53,25.99,30.37,26.26

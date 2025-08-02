@@ -40,7 +40,7 @@ class TabParams(Params):
     def __init__(self, **kwargs):
         self.shift_scale = 10
         self.label_type = 'log_scaled'
-        self.default = "MipLogLevel-2"
+        self.default = "default"
         self.valid_train_ratio = 0.2
         #About PyTorch Lightning
         self._init_pyl_params()

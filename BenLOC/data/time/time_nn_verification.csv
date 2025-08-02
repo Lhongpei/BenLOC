@@ -1,4 +1,4 @@
-File Name,MipLogLevel-2,TreeCutLevel-1,TreeCutLevel-0,StrongBranching-1,RoundingHeurLevel-1,DivingHeurLevel-0,RootCutLevel-0,StrongBranching-0,RootCutLevel-1,DivingHeurLevel-1,RoundingHeurLevel-0,SubMipHeurLevel-1,SubMipHeurLevel-0
+File Name,default,TreeCutLevel-1,TreeCutLevel-0,StrongBranching-1,RoundingHeurLevel-1,DivingHeurLevel-0,RootCutLevel-0,StrongBranching-0,RootCutLevel-1,DivingHeurLevel-1,RoundingHeurLevel-0,SubMipHeurLevel-1,SubMipHeurLevel-0
 test_1082.proto,2.69,2.41,2.79,2.75,2.79,2.8,3.34,2.87,2.69,2.62,2.75,1.41,1.43
 test_1087.proto,2.46,2.85,2.57,2.44,2.41,2.47,6.55,2.39,2.09,2.43,2.47,2.09,2.07
 test_1112.proto,6.33,2.0,6.01,6.28,6.26,6.67,6.34,7.64,1.83,6.62,6.37,6.49,6.09

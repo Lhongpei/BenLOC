@@ -1,4 +1,4 @@
-File Name,MipLogLevel-2,SubMipHeurLevel-0,SubMipHeurLevel-1,RootCutLevel-0
+File Name,default,SubMipHeurLevel-0,SubMipHeurLevel-1,RootCutLevel-0
 test_1600r_1600c_0.01d_instance_148,148.86,124.0,152.47,120.69
 test_1600r_1600c_0.01d_instance_284,112.45,90.19,107.2,99.76
 test_1600r_1600c_0.01d_instance_314,180.0,180.0,180.0,180.0

@@ -21,7 +21,7 @@ The parameters for the `BenLOC` class can be set during initialization. You can 
 
 ```python
 from BenLOC import TabParams
-params = TabParams(default="MipLogLevel-2", label_type="log_scaled", shift_scale=10)
+params = TabParams(default="default", label_type="log_scaled", shift_scale=10)
 model = BenLOC(params)
 ```
 
@@ -158,7 +158,7 @@ model.gbdt_parameter_space
 ```python
 # Step 1: Initialize the model with parameters
 from BenLOC.params import Params
-params = Params(default="MipLogLevel-2", label_type="log_scaled", shift_scale=10)
+params = Params(default="default", label_type="log_scaled", shift_scale=10)
 model = BenLOC(params)
 
 # Step 2: Set the machine learning model (e.g., Random Forest)

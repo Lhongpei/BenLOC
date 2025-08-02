@@ -9,6 +9,7 @@ instances/
   independent_set/          -> 1604 instances
   nn_verification/          -> 3104 instances
   load_balancing/           -> 2286 instances
+  vrp/                      -> 1232 instances
 ```
 
 ### Dataset Description

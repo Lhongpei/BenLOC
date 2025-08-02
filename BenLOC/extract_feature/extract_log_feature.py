@@ -256,7 +256,7 @@ def parse_log_symmetry(file_path):
     return df
 
 def extract(dir, name):
-    l_dir = [d for d in os.listdir(dir) if name in d and ("MipLogLevel-2" in d)]
+    l_dir = [d for d in os.listdir(dir) if name in d and ("default" in d)]
 
     def process_file(file):
         tmp_df = parse_log_file(file)

@@ -8,7 +8,7 @@ import os
 def splitfold(name, time_path, feat_path):
     time = pd.read_csv(f"{time_path}/time_{name}.csv")
     feat = pd.read_csv(f"{feat_path}/feat_{name}.csv")
-    # time=time[['File Name','SubMipHeurLevel-0','MipLogLevel-2']]
+    # time=time[['File Name','SubMipHeurLevel-0','default']]
     df = pd.merge(feat, time, on="File Name", how="inner")
     time = time[time["File Name"].isin(df["File Name"].tolist())]
 
