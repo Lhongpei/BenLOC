@@ -312,8 +312,7 @@ trainer.run()
 ### **Example Full Script**
 
 ```python
-# Import necessary libraries
-from trainer import GNNTrainer  # Assuming your trainer is saved as trainer.py
+from trainer import GNNTrainer 
 
 # Define parameters
 params = {
